@@ -1,0 +1,27 @@
+<?php
+
+return [
+    'User_id'            => '用户ID',
+    'Currency type'      => '出售币种',
+    'Currency u coin'    => 'U币',
+    'Price'              => '单价',
+    'Count'              => '出售数量',
+    'Task status'        => '状态',
+    'Task status pending'=> '待交易',
+    'Task status trading'=> '交易中',
+    'Task status done'   => '完成交易',
+    'Is on shelf'        => '是否上架',
+    'Shelf time'         => '上架时间',
+    'Is deleted'         => '删除状态',
+    'Pay methods'        => '支付方式',
+    'Paytype id'         => '支付方式',
+    'Paytype alipay'     => '支付宝',
+    'Paytype wechat'     => '微信支付',
+    'Paytype bank'       => '银行卡',
+    'Paytype huimei'     => '汇美支付',
+    'Account'            => '支付账号',
+    'Nickname'           => '账号昵称/姓名',
+    'Open bank'          => '开户行',
+    'Detail'             => '详情',
+    'Operate'            => '操作',
+];
