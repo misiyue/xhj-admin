@@ -25,4 +25,4 @@ CREATE TABLE IF NOT EXISTS `fa_merchant` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='商户';
 
 -- 菜单与权限节点 name 须为 merchant/merchant、merchant/merchant/index 等；
--- 请在后台「权限管理 → 菜单规则」中新增菜单，父级选业务分组，控制器填写 merchant.merchant 或按 FastAdmin 习惯添加「商户管理」及子节点 index。
+-- 请在后台「权限管理 → 菜单规则」中新增菜单，父级选业务分组，控制器填写 merchant.merchant 或按 FastAdmin 习惯添加「商户管理」及子节点 index、auditlist、audit。

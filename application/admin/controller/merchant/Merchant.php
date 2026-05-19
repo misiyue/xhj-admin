@@ -38,6 +38,27 @@ class Merchant extends Backend
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $list = $this->model
                 ->where($where)
+                ->where('status', 1)
+                ->order($sort, $order)
+                ->paginate($limit);
+            $result = array("total" => $list->total(), "rows" => $list->items());
+
+            return json($result);
+        }
+        return $this->view->fetch();
+    }
+
+    /**
+     * 待审核商户列表（弹窗）
+     */
+    public function auditlist()
+    {
+        $this->request->filter(['strip_tags', 'trim']);
+        if ($this->request->isAjax()) {
+            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            $list = $this->model
+                ->where($where)
+                ->where('status', 0)
                 ->order($sort, $order)
                 ->paginate($limit);
             $result = array("total" => $list->total(), "rows" => $list->items());

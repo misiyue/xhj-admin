@@ -11,6 +11,7 @@ return [
     'Is frozen'       => '是否被封禁',
     'Is closed'       => '是否被关停',
     'Audit'           => '审核',
+    'Merchant audit apply' => '商户审核申请',
     'Operate'         => '操作',
     'Only pending merchant can be audited' => '仅待审核状态的商户可审核',
     'Already audited or status changed' => '状态已变更，请刷新列表后重试',

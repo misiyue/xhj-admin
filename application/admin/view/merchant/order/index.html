@@ -7,11 +7,9 @@
                 <div class="widget-body no-padding">
                     <div id="toolbar" class="toolbar">
                         {:build_toolbar('refresh')}
-                        {if $auth->check('merchant/merchant/auditlist')}
-                        <a href="merchant/merchant/auditlist" class="btn btn-warning btn-dialog" title="{:__('Merchant audit apply')}" data-area='["90%","85%"]'><i class="fa fa-gavel"></i> {:__('Merchant audit apply')}</a>
-                        {/if}
                     </div>
                     <table id="table" class="table table-striped table-bordered table-hover table-nowrap"
+                           data-operate-detail="{:$auth->check('merchant/order/detail')}"
                            width="100%">
                     </table>
                 </div>

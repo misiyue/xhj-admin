@@ -5,7 +5,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             Table.api.init({
                 extend: {
                     index_url: 'merchant/merchant/index',
-                    audit_url: 'merchant/merchant/audit',
                     table: 'merchant',
                 }
             });
@@ -22,21 +21,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'id', title: __('Id'), sortable: true},
                         {field: 'nickname', title: __('Merchant name'), operate: 'LIKE'},
                         {field: 'user_id', title: __('User_id'), operate: '='},
-                        {
-                            field: 'status',
-                            title: __('Audit status'),
-                            operate: '=',
-                            searchList: {0: __('Pending review'), 1: __('Approved'), 2: __('Rejected')},
-                            formatter: function (value) {
-                                var map = {
-                                    0: ['label-warning', __('Pending review')],
-                                    1: ['label-success', __('Approved')],
-                                    2: ['label-danger', __('Rejected')]
-                                };
-                                var m = map[value] || ['label-default', '—'];
-                                return '<span class="label ' + m[0] + '">' + m[1] + '</span>';
-                            }
-                        },
                         {
                             field: 'is_limit',
                             title: __('Is limited'),
@@ -78,6 +62,43 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             formatter: Table.api.formatter.datetime,
                             sortable: true,
                             width: 160
+                        }
+                    ]
+                ]
+            });
+
+            Table.api.bindevent(table);
+        },
+        auditlist: function () {
+            Table.api.init({
+                extend: {
+                    index_url: 'merchant/merchant/auditlist',
+                    audit_url: 'merchant/merchant/audit',
+                    table: 'merchant',
+                }
+            });
+
+            var table = $("#table");
+
+            table.bootstrapTable({
+                url: $.fn.bootstrapTable.defaults.extend.index_url,
+                pk: 'id',
+                sortName: 'id',
+                sortOrder: 'desc',
+                columns: [
+                    [
+                        {field: 'id', title: __('Id'), sortable: true},
+                        {field: 'nickname', title: __('Merchant name'), operate: 'LIKE'},
+                        {field: 'user_id', title: __('User_id'), operate: '='},
+                        {field: 'realname', title: __('Realname'), operate: 'LIKE'},
+                        {
+                            field: 'created_at',
+                            title: __('Createtime'),
+                            operate: 'RANGE',
+                            addclass: 'datetimerange',
+                            formatter: Table.api.formatter.datetime,
+                            sortable: true,
+                            width: 160
                         },
                         {
                             field: 'operate',
@@ -91,10 +112,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     title: __('Audit'),
                                     classname: 'btn btn-xs btn-success btn-dialog',
                                     icon: 'fa fa-gavel',
-                                    url: 'merchant/merchant/audit',
-                                    visible: function (row) {
-                                        return parseInt(row.status, 10) === 0;
-                                    }
+                                    url: 'merchant/merchant/audit'
                                 }
                             ],
                             formatter: Table.api.formatter.operate
@@ -121,6 +139,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     data: $form.serialize()
                 }, function () {
                     parent.$(".btn-refresh").trigger("click");
+                    try {
+                        if (parent.parent && parent.parent.$) {
+                            parent.parent.$(".btn-refresh").trigger("click");
+                        }
+                    } catch (e) {
+                    }
                     var index = parent.Layer.getFrameIndex(window.name);
                     parent.Layer.close(index);
                 });
