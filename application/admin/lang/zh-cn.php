@@ -221,4 +221,8 @@ return [
     'Users Module'                                           => '会员模块',
     'Register'                                              => '注册',
     'Users Center'                                           => '会员中心',
+    'Wallet api not configured'                              => '钱包接口未配置，请检查 .env 中 wallet.baseurl 与 wallet.key',
+    'Wallet api request failed'                              => '钱包接口请求失败',
+    'Wallet api invalid response'                            => '钱包接口返回格式异常',
+    'Wallet api unfreeze failed'                             => '解冻保证金失败',
 ];

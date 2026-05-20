@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS `fa_merchant` (
   `image` varchar(255) NOT NULL COMMENT '证件图片',
   `backimage` varchar(255) DEFAULT NULL COMMENT '证件背面',
   `surety` decimal(12,4) NOT NULL DEFAULT '0.0000' COMMENT '保证金',
+  `surety_bill_id` int(11) NOT NULL DEFAULT '0' COMMENT '保证金冻结账单id，驳回解冻后归零',
   `status` tinyint(1) NOT NULL DEFAULT '0' COMMENT '审核状态 0待审核 1审核通过 2驳回',
   `reason` varchar(255) DEFAULT NULL COMMENT '驳回原因',
   `is_limit` tinyint(1) NOT NULL DEFAULT '0' COMMENT '是否被限制',

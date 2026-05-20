@@ -3,7 +3,9 @@
 namespace app\admin\controller\merchant;
 
 use app\admin\model\Merchant as MerchantModel;
+use app\admin\model\Users;
 use app\common\controller\Backend;
+use app\common\library\WalletApi;
 
 /**
  * 商户管理
@@ -108,9 +110,27 @@ class Merchant extends Backend
                 if ($reason === '') {
                     $this->error(__('Reject reason required'));
                 }
+                $surety = (float)$row['surety'];
+                $suretyBillId = (int)($row['surety_bill_id'] ?? 0);
+                if ($surety > 0 || $suretyBillId > 0) {
+                    $user = Users::get($row['user_id']);
+                    if (!$user || trim((string)$user['uuid']) === '') {
+                        $this->error(__('User uuid not found'));
+                    }
+                    $unfreeze = WalletApi::unfreezeAccount(
+                        (int)$row['user_id'],
+                        (string)$user['uuid'],
+                        rtrim(rtrim(sprintf('%.4f', $surety), '0'), '.') ?: '0',
+                        1
+                    );
+                    if (!$unfreeze['success']) {
+                        $this->error($unfreeze['message'] ?: __('Wallet api unfreeze failed'));
+                    }
+                }
                 $updated = $this->model->where('id', $row['id'])->where('status', 0)->update([
-                    'status' => 2,
-                    'reason'  => $reason,
+                    'status'         => 2,
+                    'reason'         => $reason,
+                    'surety_bill_id' => 0,
                 ]);
                 if (!$updated) {
                     $this->error(__('Already audited or status changed'));
