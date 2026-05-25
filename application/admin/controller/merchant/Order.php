@@ -4,6 +4,8 @@ namespace app\admin\controller\merchant;
 
 use app\admin\model\MerchantOrder as MerchantOrderModel;
 use app\common\controller\Backend;
+use think\Db;
+use think\Exception;
 
 /**
  * 商户订单
@@ -33,6 +35,8 @@ class Order extends Backend
         $this->assignconfig('payTypeList', MerchantOrderModel::getPayTypeList());
         $this->assignconfig('buyTypeList', MerchantOrderModel::getBuyTypeList());
         $this->assignconfig('yesNoList', MerchantOrderModel::getYesNoList());
+        $this->assignconfig('appealIdList', MerchantOrderModel::getAppealIdList());
+        $this->assignconfig('wrongerList', MerchantOrderModel::getWrongerList());
     }
 
     /**
@@ -48,12 +52,109 @@ class Order extends Backend
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $list = $this->model
                 ->where($where)
+                ->whereRaw('(is_appeal = 0 OR (is_appeal = 1 AND judge_time > 0))')
                 ->order($sort, $order)
                 ->paginate($limit);
             $result = array("total" => $list->total(), "rows" => $list->items());
 
             return json($result);
         }
+        return $this->view->fetch();
+    }
+
+    /**
+     * 申诉订单列表（弹窗）
+     */
+    public function appeallist()
+    {
+        $this->request->filter(['strip_tags', 'trim']);
+        if ($this->request->isAjax()) {
+            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            $list = $this->model
+                ->where($where)
+                ->where('is_appeal', 1)
+                ->where('judge_time', 0)
+                ->order($sort, $order)
+                ->paginate($limit);
+            $result = array("total" => $list->total(), "rows" => $list->items());
+
+            return json($result);
+        }
+        return $this->view->fetch();
+    }
+
+    /**
+     * 申诉处理
+     *
+     * @param string|null $ids
+     * @return mixed
+     */
+    public function handle($ids = null)
+    {
+        $ids = $ids !== null && $ids !== '' ? $ids : $this->request->param('ids');
+        $row = $this->model->get($ids);
+        if (!$row) {
+            $this->error(__('No Results were found'));
+        }
+        if ((int)$row['is_appeal'] !== 1 || (int)$row['judge_time'] !== 0) {
+            $this->error(__('Only pending appeal order can be handled'));
+        }
+
+        if ($this->request->isPost()) {
+            $this->token();
+            $postIds = $this->request->post('ids', $ids);
+            if ((string)$postIds !== (string)$row['id']) {
+                $this->error(__('Invalid parameters'));
+            }
+            $wronger = $this->request->post('wronger', '');
+            $judge = trim((string)$this->request->post('judge', ''));
+            if ($wronger === '' || !in_array((int)$wronger, [0, 1, 2], true)) {
+                $this->error(__('Wronger required'));
+            }
+            $wronger = (int)$wronger;
+            if ($judge === '') {
+                $this->error(__('Judge result required'));
+            }
+            $judgeTime = time();
+
+            Db::startTrans();
+            try {
+                $order = $this->model
+                    ->where('id', $row['id'])
+                    ->where('is_appeal', 1)
+                    ->where('judge_time', 0)
+                    ->lock(true)
+                    ->find();
+                if (!$order) {
+                    throw new Exception(__('Already handled or status changed'));
+                }
+                $update = [
+                    'wronger'    => $wronger,
+                    'judge'      => $judge,
+                    'judge_time' => $judgeTime,
+                ];
+                if ((int)$order['status'] === 4) {
+                    $update['status'] = 2;
+                }
+                $updated = $this->model
+                    ->where('id', $order['id'])
+                    ->where('is_appeal', 1)
+                    ->where('judge_time', 0)
+                    ->update($update);
+                if (!$updated) {
+                    throw new Exception(__('Already handled or status changed'));
+                }
+                Db::commit();
+            } catch (\Throwable $e) {
+                Db::rollback();
+                $this->error($e->getMessage());
+            }
+            $this->success(__('Handle success'));
+        }
+
+        $data = $this->formatOrderRow($row);
+        $this->view->assign('row', $data);
+        $this->view->assign('handleWrongerList', MerchantOrderModel::getWrongerList());
         return $this->view->fetch();
     }
 
@@ -70,7 +171,19 @@ class Order extends Backend
         if (!$row) {
             $this->error(__('No Results were found'));
         }
-        $data = $row->toArray();
+        $this->view->assign('row', $this->formatOrderRow($row));
+        return $this->view->fetch();
+    }
+
+    /**
+     * 订单展示字段
+     *
+     * @param \think\Model|array $row
+     * @return array
+     */
+    protected function formatOrderRow($row)
+    {
+        $data = is_array($row) ? $row : $row->toArray();
         $statusList = MerchantOrderModel::getStatusList();
         $payTypeList = MerchantOrderModel::getPayTypeList();
         $buyTypeList = MerchantOrderModel::getBuyTypeList();
@@ -93,7 +206,6 @@ class Order extends Backend
         $judge = trim((string)($data['judge'] ?? ''));
         $data['judge_result'] = $judge !== '' ? $judge : '-';
 
-        $this->view->assign('row', $data);
-        return $this->view->fetch();
+        return $data;
     }
 }
