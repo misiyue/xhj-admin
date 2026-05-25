@@ -62,4 +62,7 @@ return [
     'Please select wronger' => '请选择过错方',
     'Wronger help'          => '0-无，1-买家，2-卖家',
     'Judge time auto help'  => '提交后由系统自动写入裁定时间',
+    'Wronger buyer help'    => '过错方为买家时：购买数量退回挂单任务，订单置为已取消',
+    'Task not found or deleted' => '关联挂单不存在或已删除',
+    'Failed to restore task count' => '挂单数量回退失败',
 ];

@@ -3,6 +3,7 @@
 namespace app\admin\controller\merchant;
 
 use app\admin\model\MerchantOrder as MerchantOrderModel;
+use app\admin\model\MerchantTask as MerchantTaskModel;
 use app\common\controller\Backend;
 use think\Db;
 use think\Exception;
@@ -133,7 +134,32 @@ class Order extends Backend
                     'judge'      => $judge,
                     'judge_time' => $judgeTime,
                 ];
-                if ((int)$order['status'] === 4) {
+                // 过错方为买家：数量退回挂单，订单取消
+                if ($wronger === 1) {
+                    $update['status'] = 3;
+                    $update['is_cancel'] = 1;
+                    $update['cancel_time'] = $judgeTime;
+                    $taskId = (int)$order['task_id'];
+                    $orderCounts = (float)$order['counts'];
+                    if ($taskId > 0 && $orderCounts > 0) {
+                        $taskModel = new MerchantTaskModel();
+                        $task = $taskModel
+                            ->where('id', $taskId)
+                            ->where('is_deleted', 0)
+                            ->lock(true)
+                            ->find();
+                        if (!$task) {
+                            throw new Exception(__('Task not found or deleted'));
+                        }
+                        $restored = $taskModel
+                            ->where('id', $taskId)
+                            ->where('is_deleted', 0)
+                            ->setInc('count', $orderCounts);
+                        if (!$restored) {
+                            throw new Exception(__('Failed to restore task count'));
+                        }
+                    }
+                } elseif ((int)$order['status'] === 4) {
                     $update['status'] = 2;
                 }
                 $updated = $this->model
