@@ -1,4 +1,67 @@
-define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefined, Backend, Table, Form) {
+define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'moment'], function ($, undefined, Backend, Table, Form, Moment) {
+
+    var findRowById = function (table, id) {
+        id = parseInt(id, 10);
+        if (!id) {
+            return null;
+        }
+        var row = table.bootstrapTable('getRowByUniqueId', id);
+        if (row) {
+            return row;
+        }
+        var data = table.bootstrapTable('getData') || [];
+        for (var i = 0; i < data.length; i++) {
+            if (parseInt(data[i].id, 10) === id) {
+                return data[i];
+            }
+        }
+        return null;
+    };
+
+    var openAppealJudgeDetail = function (row) {
+        var wrongerList = Config.wrongerList || {};
+        var wrongerText = wrongerList[row.wronger] !== undefined ? wrongerList[row.wronger] : (row.wronger !== undefined && row.wronger !== '' ? row.wronger : '-');
+        var judgeText = $.trim(row.judge || '') || '-';
+        var judgeTimeText = '-';
+        var judgeTime = parseInt(row.judge_time, 10);
+        if (judgeTime > 0) {
+            judgeTimeText = Moment.unix(judgeTime).format('YYYY-MM-DD HH:mm:ss');
+        }
+        var html = '<div class="appeal-judge-layer" style="padding:18px 22px;line-height:2;font-size:14px;">' +
+            '<p><strong>' + __('Wronger') + '：</strong>' + $('<div/>').text(wrongerText).html() + '</p>' +
+            '<p><strong>' + __('Judge result') + '：</strong>' + $('<div/>').text(judgeText).html() + '</p>' +
+            '<p><strong>' + __('Judge time') + '：</strong>' + $('<div/>').text(judgeTimeText).html() + '</p>' +
+            '</div>';
+        Layer.open({
+            type: 1,
+            title: __('Appeal judgment detail'),
+            area: ['480px', 'auto'],
+            shadeClose: true,
+            content: html
+        });
+    };
+
+    var bindAppealJudgeDetail = function (table) {
+        table.closest('.panel-body, .widget-body').on('click', '.btn-appeal-judge-detail', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            var $btn = $(this);
+            var id = $btn.data('id');
+            var row = findRowById(table, id);
+            if (!row && $btn.attr('data-wronger') !== undefined) {
+                row = {
+                    wronger: $btn.attr('data-wronger'),
+                    judge: $btn.attr('data-judge') || '',
+                    judge_time: parseInt($btn.attr('data-judge-time'), 10) || 0
+                };
+            }
+            if (!row) {
+                Toastr.error(__('No appeal judgment data'));
+                return;
+            }
+            openAppealJudgeDetail(row);
+        });
+    };
 
     var orderColumns = function (table, options) {
         options = options || {};
@@ -25,9 +88,15 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 operate: false,
                 formatter: function (value, row) {
                     if (parseInt(row.is_appeal, 10) !== 1) {
-                        return '<span class="label label-default">' + __('No') + '</span>';
+                        return '<span class="label label-default">' + __('Wronger none') + '</span>';
                     }
-                    return '<a href="javascript:;" class="btn btn-xs btn-warning btn-appeal-judge-detail" data-id="' + row.id + '" title="' + __('Appeal judgment detail') + '">' +
+                    var judgeAttr = $('<div/>').text($.trim(row.judge || '')).html();
+                    return '<a href="javascript:;" class="btn btn-xs btn-warning btn-appeal-judge-detail" ' +
+                        'data-id="' + row.id + '" ' +
+                        'data-wronger="' + (row.wronger !== undefined ? row.wronger : '') + '" ' +
+                        'data-judge="' + judgeAttr + '" ' +
+                        'data-judge-time="' + (parseInt(row.judge_time, 10) || 0) + '" ' +
+                        'title="' + __('Appeal judgment detail') + '">' +
                         '<i class="fa fa-gavel"></i> ' + __('Detail') + '</a>';
                 }
             });
@@ -109,6 +178,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             table.bootstrapTable({
                 url: $.fn.bootstrapTable.defaults.extend.index_url,
                 pk: 'id',
+                uniqueId: 'id',
                 sortName: 'id',
                 sortOrder: 'desc',
                 columns: orderColumns(table, {
@@ -127,37 +197,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             });
 
             Table.api.bindevent(table);
-
-            table.on('click', '.btn-appeal-judge-detail', function (e) {
-                e.preventDefault();
-                e.stopPropagation();
-                var id = $(this).data('id');
-                var row = table.bootstrapTable('getRowByUniqueId', id);
-                if (!row) {
-                    return;
-                }
-                var wrongerList = Config.wrongerList || {};
-                var wrongerText = wrongerList[row.wronger] !== undefined ? wrongerList[row.wronger] : row.wronger;
-                var judgeText = $.trim(row.judge || '') || '-';
-                var judgeTimeText = '-';
-                if (parseInt(row.judge_time, 10) > 0) {
-                    judgeTimeText = typeof Moment !== 'undefined'
-                        ? Moment.unix(row.judge_time).format('YYYY-MM-DD HH:mm:ss')
-                        : row.judge_time;
-                }
-                var html = '<div class="appeal-judge-layer" style="padding:18px 22px;line-height:2;font-size:14px;">' +
-                    '<p><strong>' + __('Wronger') + '：</strong>' + wrongerText + '</p>' +
-                    '<p><strong>' + __('Judge result') + '：</strong>' + $('<div/>').text(judgeText).html() + '</p>' +
-                    '<p><strong>' + __('Judge time') + '：</strong>' + judgeTimeText + '</p>' +
-                    '</div>';
-                Layer.open({
-                    type: 1,
-                    title: __('Appeal judgment detail'),
-                    area: ['460px', 'auto'],
-                    shadeClose: true,
-                    content: html
-                });
-            });
+            bindAppealJudgeDetail(table);
         },
         appeallist: function () {
             Table.api.init({
@@ -173,6 +213,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             table.bootstrapTable({
                 url: $.fn.bootstrapTable.defaults.extend.index_url,
                 pk: 'id',
+                uniqueId: 'id',
                 sortName: 'id',
                 sortOrder: 'desc',
                 columns: orderColumns(table, {

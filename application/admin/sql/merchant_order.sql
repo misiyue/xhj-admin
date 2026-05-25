@@ -32,4 +32,4 @@ CREATE TABLE IF NOT EXISTS `merchant_order` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='商户订单';
 
 -- 菜单：merchant/order，子节点 index、detail、appeallist、handle
--- 主列表：is_appeal=0 或 (is_appeal=1 且 judge_time>0)；申诉列表：is_appeal=1 且 judge_time=0
+-- 主列表：is_appeal=0 或 (is_appeal=1 且 judge_time>0)；申诉列表：is_appeal=1 且 judge_time=0 且 status=1（待放币）

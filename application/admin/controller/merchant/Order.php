@@ -75,6 +75,7 @@ class Order extends Backend
                 ->where($where)
                 ->where('is_appeal', 1)
                 ->where('judge_time', 0)
+                ->where('status', 1)
                 ->order($sort, $order)
                 ->paginate($limit);
             $result = array("total" => $list->total(), "rows" => $list->items());
@@ -97,7 +98,7 @@ class Order extends Backend
         if (!$row) {
             $this->error(__('No Results were found'));
         }
-        if ((int)$row['is_appeal'] !== 1 || (int)$row['judge_time'] !== 0) {
+        if ((int)$row['is_appeal'] !== 1 || (int)$row['judge_time'] !== 0 || (int)$row['status'] !== 1) {
             $this->error(__('Only pending appeal order can be handled'));
         }
 
@@ -124,6 +125,7 @@ class Order extends Backend
                     ->where('id', $row['id'])
                     ->where('is_appeal', 1)
                     ->where('judge_time', 0)
+                    ->where('status', 1)
                     ->lock(true)
                     ->find();
                 if (!$order) {
@@ -166,6 +168,7 @@ class Order extends Backend
                     ->where('id', $order['id'])
                     ->where('is_appeal', 1)
                     ->where('judge_time', 0)
+                    ->where('status', 1)
                     ->update($update);
                 if (!$updated) {
                     throw new Exception(__('Already handled or status changed'));

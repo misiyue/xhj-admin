@@ -30,7 +30,7 @@ return [
     'Appeal judgment'       => '申诉裁定',
     'Appeal judgment detail'=> '申诉裁定详情',
     'No appeal judgment data' => '暂无申诉裁定数据',
-    'Only pending appeal order can be handled' => '仅未裁定的申诉订单可处理',
+    'Only pending appeal order can be handled' => '仅未裁定且已支付（待放币）的申诉订单可处理',
     'Handle'                => '处理',
     'Handle appeal'         => '申诉处理',
     'Handle success'        => '处理成功',
