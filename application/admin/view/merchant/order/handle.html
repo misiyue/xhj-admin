@@ -64,7 +64,16 @@
                 <option value="{$key|htmlentities}">{$label|htmlentities}</option>
                 {/foreach}
             </select>
-            <span class="help-block">{:__('Wronger help')}；{:__('Wronger buyer help')}</span>
+            <span class="help-block">{:__('Wronger help')}</span>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-3">{:__('Cancel order option')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <label class="checkbox-inline">
+                <input type="checkbox" name="cancel_order" value="1"> {:__('Cancel order by judge')}
+            </label>
+            <span class="help-block">{:__('Cancel order by judge help')}</span>
         </div>
     </div>
     <div class="form-group">

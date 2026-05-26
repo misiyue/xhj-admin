@@ -15,6 +15,9 @@ use think\Exception;
  */
 class Order extends Backend
 {
+    /** 后台裁定取消订单时写入 remark */
+    const REMARK_JUDGE_CANCEL = '后台裁定取消';
+
     /**
      * @var MerchantOrderModel
      */
@@ -117,6 +120,7 @@ class Order extends Backend
             if ($judge === '') {
                 $this->error(__('Judge result required'));
             }
+            $cancelOrder = (int)$this->request->post('cancel_order', 0) === 1;
             $judgeTime = time();
 
             Db::startTrans();
@@ -136,11 +140,12 @@ class Order extends Backend
                     'judge'      => $judge,
                     'judge_time' => $judgeTime,
                 ];
-                // 过错方为买家：数量退回挂单，订单取消
-                if ($wronger === 1) {
+                // 勾选取消订单：数量退回挂单，订单置为已取消
+                if ($cancelOrder) {
                     $update['status'] = 3;
                     $update['is_cancel'] = 1;
                     $update['cancel_time'] = $judgeTime;
+                    $update['remark'] = self::REMARK_JUDGE_CANCEL;
                     $taskId = (int)$order['task_id'];
                     $orderCounts = (float)$order['counts'];
                     if ($taskId > 0 && $orderCounts > 0) {

@@ -5,6 +5,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             Table.api.init({
                 extend: {
                     index_url: 'merchant/merchant/index',
+                    multi_url: 'merchant/merchant/multi',
                     table: 'merchant',
                 }
             });
@@ -55,6 +56,15 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             }
                         },
                         {
+                            field: 'is_hm',
+                            title: __('Huimei pay'),
+                            align: 'center',
+                            operate: '=',
+                            searchList: {0: __('No'), 1: __('Yes')},
+                            table: table,
+                            formatter: Table.api.formatter.toggle
+                        },
+                        {
                             field: 'created_at',
                             title: __('Createtime'),
                             operate: 'RANGE',
@@ -68,6 +78,21 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             });
 
             Table.api.bindevent(table);
+
+            // 汇美开关：成功仅提示，不刷新整表；本地更新行数据以保持开关状态
+            var bindHmToggleSuccess = function () {
+                table.find('.btn-change[data-params^="is_hm="]').data('success', function (data, ret) {
+                    var index = $(this).data('index');
+                    var row = Table.api.getrowbyindex(table, index);
+                    if (row) {
+                        row.is_hm = $('i.fa.text-gray', this).length > 0 ? 1 : 0;
+                        table.bootstrapTable('updateRow', {index: index, row: row});
+                    }
+                    return false;
+                });
+            };
+            table.on('post-body.bs.table', bindHmToggleSuccess);
+            bindHmToggleSuccess();
         },
         auditlist: function () {
             Table.api.init({
