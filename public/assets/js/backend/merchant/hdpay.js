@@ -4,9 +4,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
         index: function () {
             Table.api.init({
                 extend: {
-                    index_url: 'merchant/hmpay/index',
-                    detail_url: 'merchant/hmpay/detail',
-                    table: 'merchant_hm_order',
+                    index_url: 'merchant/hdpay/index',
+                    detail_url: 'merchant/hdpay/detail',
+                    table: 'merchant_hd_order',
                 }
             });
 
@@ -81,7 +81,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     title: __('Detail'),
                                     classname: 'btn btn-xs btn-info btn-dialog',
                                     icon: 'fa fa-list',
-                                    url: 'merchant/hmpay/detail'
+                                    url: 'merchant/hdpay/detail'
                                 }
                             ],
                             formatter: Table.api.formatter.operate

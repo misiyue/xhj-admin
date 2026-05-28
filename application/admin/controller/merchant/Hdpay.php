@@ -2,7 +2,7 @@
 
 namespace app\admin\controller\merchant;
 
-use app\admin\model\MerchantHmOrder as MerchantHmOrderModel;
+use app\admin\model\MerchantHdOrder as MerchantHdOrderModel;
 use app\common\controller\Backend;
 
 /**
@@ -10,10 +10,10 @@ use app\common\controller\Backend;
  *
  * @icon fa fa-credit-card
  */
-class Hmpay extends Backend
+class Hdpay extends Backend
 {
     /**
-     * @var MerchantHmOrderModel
+     * @var MerchantHdOrderModel
      */
     protected $model = null;
 
@@ -22,8 +22,8 @@ class Hmpay extends Backend
     public function _initialize()
     {
         parent::_initialize();
-        $this->model = new MerchantHmOrderModel;
-        $this->assignconfig('statusList', MerchantHmOrderModel::getStatusList());
+        $this->model = new MerchantHdOrderModel;
+        $this->assignconfig('statusList', MerchantHdOrderModel::getStatusList());
     }
 
     /**
@@ -75,9 +75,9 @@ class Hmpay extends Backend
         $status = strtolower(trim((string)($data['status'] ?? '')));
         $data['status_is_success'] = $status === 'success';
         $data['status_label_class'] = $data['status_is_success'] ? 'success' : 'danger';
-        $data['payed_at_text'] = MerchantHmOrderModel::formatDisplayDatetime($data['payed_at'] ?? '');
-        $data['created_at_text'] = MerchantHmOrderModel::formatDisplayDatetime($data['created_at'] ?? '');
-        $data['updated_at_text'] = MerchantHmOrderModel::formatDisplayDatetime($data['updated_at'] ?? '');
+        $data['payed_at_text'] = MerchantHdOrderModel::formatDisplayDatetime($data['payed_at'] ?? '');
+        $data['created_at_text'] = MerchantHdOrderModel::formatDisplayDatetime($data['created_at'] ?? '');
+        $data['updated_at_text'] = MerchantHdOrderModel::formatDisplayDatetime($data['updated_at'] ?? '');
         $payUrl = trim((string)($data['pay_url'] ?? ''));
         $data['pay_url_display'] = $payUrl !== '' ? $payUrl : '-';
 

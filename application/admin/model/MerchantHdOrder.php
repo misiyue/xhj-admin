@@ -7,9 +7,9 @@ use think\Model;
 /**
  * 汇美支付订单
  */
-class MerchantHmOrder extends Model
+class MerchantHdOrder extends Model
 {
-    protected $table = 'merchant_hm_order';
+    protected $table = 'merchant_hd_order';
 
     protected $autoWriteTimestamp = false;
 
