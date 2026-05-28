@@ -1,0 +1,65 @@
+<form class="form-horizontal" role="form">
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-3">{:__('Id')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <p class="form-control-static">{$row.id|htmlentities}</p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-3">{:__('Merchant order no')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <p class="form-control-static">{$row.order_no|htmlentities}</p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-3">{:__('Platform order no')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <p class="form-control-static">{$row.local_no|htmlentities}</p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-3">{:__('Submit amount')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <p class="form-control-static">{$row.submit_amount|htmlentities}</p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-3">{:__('Order status')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <p class="form-control-static">
+                <span class="label label-{$row.status_label_class|htmlentities}">{$row.status|htmlentities}</span>
+                {if $row.status_text}
+                <span class="text-muted">（{$row.status_text|htmlentities}）</span>
+                {/if}
+            </p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-3">{:__('Pay url')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            {if $row.pay_url}
+            <p class="form-control-static"><a href="{$row.pay_url|htmlentities}" target="_blank" rel="noopener noreferrer">{$row.pay_url|htmlentities}</a></p>
+            {else/}
+            <p class="form-control-static">-</p>
+            {/if}
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-3">{:__('Pay time')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <p class="form-control-static">{$row.payed_at_text|htmlentities}</p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-3">{:__('Createtime')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <p class="form-control-static">{$row.created_at_text|htmlentities}</p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-3">{:__('Updatetime')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <p class="form-control-static">{$row.updated_at_text|htmlentities}</p>
+        </div>
+    </div>
+</form>

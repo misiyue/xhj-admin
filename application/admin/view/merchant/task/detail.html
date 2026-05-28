@@ -1,0 +1,98 @@
+<form class="form-horizontal" role="form">
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-3">{:__('Id')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <p class="form-control-static">{$row.id|htmlentities}</p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-3">{:__('User_id')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <p class="form-control-static">{$row.user_id|htmlentities}</p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-3">{:__('Currency type')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <p class="form-control-static">{$row.currency_type_text|htmlentities}</p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-3">{:__('Price')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <p class="form-control-static">{$row.price|htmlentities}</p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-3">{:__('Count')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <p class="form-control-static">{$row.count|htmlentities}</p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-3">{:__('Task status')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <p class="form-control-static">{$row.status_text|htmlentities}</p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-3">{:__('Is on shelf')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <p class="form-control-static">{$row.is_up_text|htmlentities}</p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-3">{:__('Shelf time')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <p class="form-control-static">{$row.up_time_text|htmlentities}</p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-3">{:__('Is deleted')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <p class="form-control-static">{$row.is_deleted_text|htmlentities}</p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-3">{:__('Createtime')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <p class="form-control-static">{$row.created_at|htmlentities}</p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-3">{:__('Updatetime')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <p class="form-control-static">{$row.updated_at|htmlentities}</p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-3">{:__('Pay methods')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            {notempty name="paytype_list"}
+            <table class="table table-bordered table-striped" style="margin-bottom:0">
+                <thead>
+                <tr>
+                    <th>{:__('Paytype id')}</th>
+                    <th>{:__('Account')}</th>
+                    <th>{:__('Nickname')}</th>
+                    <th>{:__('Open bank')}</th>
+                </tr>
+                </thead>
+                <tbody>
+                {foreach name="paytype_list" item="pt"}
+                <tr>
+                    <td>{$pt.type_id_text|htmlentities}</td>
+                    <td>{$pt.account|htmlentities}</td>
+                    <td>{$pt.nickname|htmlentities}</td>
+                    <td>{$pt.open_bank|htmlentities}</td>
+                </tr>
+                {/foreach}
+                </tbody>
+            </table>
+            {else/}
+            <p class="form-control-static">-</p>
+            {/notempty}
+        </div>
+    </div>
+</form>
+

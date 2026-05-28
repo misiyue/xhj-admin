@@ -1,0 +1,90 @@
+<form id="audit-form" class="form-horizontal" role="form" method="post" action="">
+    {:token()}
+    <input type="hidden" name="ids" value="{$row.id|htmlentities}">
+    <input type="hidden" name="audit_action" id="audit-action" value="">
+
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-3">{:__('Merchant name')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <p class="form-control-static">{$row.nickname|htmlentities}</p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-3">{:__('User_id')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <p class="form-control-static">{$row.user_id|htmlentities}</p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-3">{:__('Realname')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <p class="form-control-static">{$row.realname|htmlentities}</p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-3">{:__('Nation')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <p class="form-control-static">{$row.nation|htmlentities}</p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-3">{:__('Id type')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <p class="form-control-static">{$row.id_type_text|htmlentities}</p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-3">{:__('Id number')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <p class="form-control-static">{$row.idcard|htmlentities}</p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-3">{:__('Id card front')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            {if $row.image_url}
+            <p class="form-control-static"><a href="{$row.image_url|htmlentities}" target="_blank"><img src="{$row.image_url|htmlentities}" class="img-thumbnail" style="max-height:200px" alt=""></a></p>
+            {else/}
+            <p class="form-control-static">—</p>
+            {/if}
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-3">{:__('Id card back')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            {if $row.backimage_url}
+            <p class="form-control-static"><a href="{$row.backimage_url|htmlentities}" target="_blank"><img src="{$row.backimage_url|htmlentities}" class="img-thumbnail" style="max-height:200px" alt=""></a></p>
+            {else/}
+            <p class="form-control-static">—</p>
+            {/if}
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-3">{:__('Surety')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <p class="form-control-static">{$row.surety|htmlentities}</p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-3">{:__('Createtime')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <p class="form-control-static">{$row.created_at|htmlentities}</p>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="c-reason" class="control-label col-xs-12 col-sm-3">{:__('Reject reason')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <textarea id="c-reason" class="form-control" name="reason" rows="3" placeholder="{:__('Reject reason placeholder')}"></textarea>
+            <span class="help-block">{:__('Reject reason help')}</span>
+        </div>
+    </div>
+
+    <div class="form-group layer-footer">
+        <label class="control-label col-xs-12 col-sm-3"></label>
+        <div class="col-xs-12 col-sm-8">
+            <button type="button" class="btn btn-success btn-embossed btn-audit-approve">{:__('Approve')}</button>
+            <button type="button" class="btn btn-danger btn-embossed btn-audit-reject">{:__('Reject')}</button>
+        </div>
+    </div>
+</form>

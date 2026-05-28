@@ -1,0 +1,145 @@
+<form class="form-horizontal" role="form">
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-3">{:__('Order no')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <p class="form-control-static">{$row.order_id|htmlentities}</p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-3">{:__('Buyer_id')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <p class="form-control-static">{$row.buyer_id|htmlentities}</p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-3">{:__('Saler_id')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <p class="form-control-static">{$row.saler_id|htmlentities}</p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-3">{:__('Amount')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <p class="form-control-static">{$row.amount|htmlentities}</p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-3">{:__('Task_id')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <p class="form-control-static">{$row.task_id|htmlentities}</p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-3">{:__('Counts')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <p class="form-control-static">{$row.counts|htmlentities}</p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-3">{:__('Order status')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <p class="form-control-static">{$row.status_text|htmlentities}</p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-3">{:__('Pay type')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <p class="form-control-static">{$row.pay_type_text|htmlentities}</p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-3">{:__('Buy type')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <p class="form-control-static">{$row.buy_type_text|htmlentities}</p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-3">{:__('Pay voucher')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            {if $row.pay_img_url}
+            <p class="form-control-static"><a href="{$row.pay_img_url|htmlentities}" target="_blank"><img src="{$row.pay_img_url|htmlentities}" class="img-thumbnail" style="max-height:200px" alt=""></a></p>
+            {else/}
+            <p class="form-control-static">-</p>
+            {/if}
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-3">{:__('Is cancelled')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <p class="form-control-static">{$row.is_cancel_text|htmlentities}</p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-3">{:__('Appeal party id')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <p class="form-control-static">{$row.appeal_id|htmlentities}</p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-3">{:__('Appeal time')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <p class="form-control-static">{$row.appeal_time_text|htmlentities}</p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-3">{:__('Appeal reason')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <p class="form-control-static">{$row.appeal_reason|default='-'|htmlentities}</p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-3">{:__('Cancel reason no')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <p class="form-control-static">{$row.cancel_id|htmlentities}</p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-3">{:__('Cancel remark')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <p class="form-control-static">{$row.remark|default='-'|htmlentities}</p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-3">{:__('Pay time')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <p class="form-control-static">{$row.pay_time_text|htmlentities}</p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-3">{:__('Cancel time')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <p class="form-control-static">{$row.cancel_time_text|htmlentities}</p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-3">{:__('Wronger')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <p class="form-control-static">{$row.wronger_text|htmlentities}</p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-3">{:__('Judge result')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <p class="form-control-static">{$row.judge_result|htmlentities}</p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-3">{:__('Judge time')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <p class="form-control-static">{$row.judge_time_text|htmlentities}</p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-3">{:__('Createtime')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <p class="form-control-static">{$row.created_at|htmlentities}</p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-3">{:__('Updatetime')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <p class="form-control-static">{$row.updated_at|htmlentities}</p>
+        </div>
+    </div>
+</form>
+
