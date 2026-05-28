@@ -6,8 +6,6 @@ use app\admin\model\Merchant as MerchantModel;
 use app\admin\model\Users;
 use app\common\controller\Backend;
 use app\common\library\WalletApi;
-use think\Db;
-use think\Exception;
 
 /**
  * 商户管理
@@ -22,9 +20,6 @@ class Merchant extends Backend
     protected $model = null;
 
     protected $searchFields = 'id,nickname,user_id';
-
-    /** @var string 批量更新允许字段（汇美开关） */
-    protected $multiFields = 'is_hm';
 
     public function _initialize()
     {
@@ -157,53 +152,5 @@ class Merchant extends Backend
 
         $this->view->assign('row', $data);
         return $this->view->fetch();
-    }
-
-    /**
-     * 汇美支付开关（仅审核通过商户）
-     *
-     * @param string|null $ids
-     */
-    public function multi($ids = null)
-    {
-        if (false === $this->request->isPost()) {
-            $this->error(__('Invalid parameters'));
-        }
-        $ids = $ids ?: $this->request->post('ids');
-        if (empty($ids)) {
-            $this->error(__('Parameter %s can not be empty', 'ids'));
-        }
-        if (false === $this->request->has('params')) {
-            $this->error(__('No rows were updated'));
-        }
-        parse_str($this->request->post('params'), $values);
-        $values = array_intersect_key($values, array_flip(is_array($this->multiFields) ? $this->multiFields : explode(',', $this->multiFields)));
-        if (empty($values) || !array_key_exists('is_hm', $values)) {
-            $this->error(__('You have no permission'));
-        }
-        $isHm = (int)$values['is_hm'];
-        if (!in_array($isHm, [0, 1], true)) {
-            $this->error(__('Invalid parameters'));
-        }
-
-        $count = 0;
-        Db::startTrans();
-        try {
-            $list = $this->model
-                ->where('status', 1)
-                ->where($this->model->getPk(), 'in', $ids)
-                ->select();
-            foreach ($list as $item) {
-                $count += $item->allowField(['is_hm'])->save(['is_hm' => $isHm]);
-            }
-            Db::commit();
-        } catch (Exception $e) {
-            Db::rollback();
-            $this->error($e->getMessage());
-        }
-        if ($count) {
-            $this->success();
-        }
-        $this->error(__('No rows were updated'));
     }
 }

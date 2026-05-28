@@ -10,8 +10,6 @@ return [
     'Is limited'      => '是否被限制',
     'Is frozen'       => '是否被封禁',
     'Is closed'       => '是否被关停',
-    'Huimei pay'      => '汇美支付',
-    'Is huimei merchant' => '是否汇美商户',
     'Audit'           => '审核',
     'Merchant audit apply' => '商户审核申请',
     'Operate'         => '操作',
