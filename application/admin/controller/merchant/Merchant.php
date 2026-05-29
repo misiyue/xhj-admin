@@ -117,7 +117,7 @@ class Merchant extends Backend
                     if (!$user || trim((string)$user['uuid']) === '') {
                         $this->error(__('User uuid not found'));
                     }
-                    $unfreeze = WalletApi::unfreezeAccount(
+                    $unfreeze = WalletApi::unfreezenAccount(
                         (int)$row['user_id'],
                         (string)$user['uuid'],
                         rtrim(rtrim(sprintf('%.4f', $surety), '0'), '.') ?: '0',

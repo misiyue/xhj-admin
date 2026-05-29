@@ -20,7 +20,7 @@ class WalletApi
      * @param int    $currencyId  币种，默认 1
      * @return array{success:bool,message:string,raw:mixed}
      */
-    public static function unfreezeAccount($uid, $uUid, $amount, $currencyId = 1)
+    public static function unfreezenAccount($uid, $uUid, $amount, $currencyId = 1)
     {
         $baseurl = Config::get('wallet.baseurl');
         $key = Config::get('wallet.key');
@@ -28,7 +28,7 @@ class WalletApi
             return ['success' => false, 'message' => __('Wallet api not configured'), 'raw' => null];
         }
 
-        $url = rtrim($baseurl, '/') . '/order/unfreezeAccount';
+        $url = rtrim($baseurl, '/') . '/order/unfreezenAccount';
         $params = [
             'uid'         => (int)$uid,
             'u_uid'       => (string)$uUid,
