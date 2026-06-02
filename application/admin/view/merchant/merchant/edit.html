@@ -1,0 +1,126 @@
+<style>
+.merchant-pay-types .pay-type-card {
+    border: 1px solid #e4e7ed;
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin-bottom: 12px;
+    background: #fff;
+    transition: border-color .2s, box-shadow .2s, background-color .2s;
+}
+.merchant-pay-types .pay-type-card.active {
+    border-color: #18bc9c;
+    background: #f6fffc;
+    box-shadow: 0 0 0 1px rgba(24, 188, 156, .15);
+}
+.merchant-pay-types .pay-type-head {
+    margin: 0;
+    font-weight: normal;
+    cursor: pointer;
+    user-select: none;
+}
+.merchant-pay-types .pay-type-head input {
+    margin-right: 8px;
+    vertical-align: -2px;
+}
+.merchant-pay-types .pay-type-head .pay-type-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: #333;
+}
+.merchant-pay-types .pay-type-extra {
+    display: none;
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px dashed #dce3eb;
+}
+.merchant-pay-types .quota-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #606266;
+    margin-bottom: 10px;
+}
+.merchant-pay-types .quota-title i {
+    color: #18bc9c;
+    margin-right: 4px;
+}
+.merchant-pay-types .quota-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+.merchant-pay-types .quota-pill {
+    display: inline-block;
+    min-width: 88px;
+    padding: 7px 16px;
+    border-radius: 999px;
+    border: 1px solid #dcdfe6;
+    background: #fff;
+    color: #606266;
+    font-size: 13px;
+    line-height: 1.4;
+    text-align: center;
+    cursor: pointer;
+    user-select: none;
+    transition: all .2s ease;
+}
+.merchant-pay-types .quota-pill:hover {
+    border-color: #18bc9c;
+    color: #18bc9c;
+}
+.merchant-pay-types .quota-pill.active {
+    background: #18bc9c;
+    border-color: #18bc9c;
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(24, 188, 156, .35);
+}
+</style>
+
+<form id="edit-form" class="form-horizontal" role="form" method="post" action="">
+    {:token()}
+    <input type="hidden" name="ids" value="{$row.id|htmlentities}">
+
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-3">{:__('Merchant name')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <p class="form-control-static">{$row.nickname|htmlentities}</p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-3">{:__('User_id')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <p class="form-control-static">{$row.user_id|htmlentities}</p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-3">{:__('Enabled pay types')}:</label>
+        <div class="col-xs-12 col-sm-8 merchant-pay-types">
+            {foreach name="payTypeList" item="label" key="key"}
+            <div class="pay-type-card{if condition="in_array($key, $payTypesChecked)"} active{/if}" data-code="{$key|htmlentities}">
+                <label class="pay-type-head">
+                    <input type="checkbox" class="pay-type-enable" name="pay_types[]" value="{$key|htmlentities}" data-code="{$key|htmlentities}"{if condition="in_array($key, $payTypesChecked)"} checked="checked"{/if}>
+                    <span class="pay-type-name">{$label|htmlentities}</span>
+                </label>
+                {if condition="$key eq 'hd'"}
+                <div class="pay-type-extra" id="pay-type-extra-hd">
+                    <div class="quota-title"><i class="fa fa-sliders"></i>{:__('Hd pay quota')}</div>
+                    <input type="hidden" name="pay_types_hd_pay_type" id="pay-types-hd-pay-type" value="{$hdPayType|htmlentities}">
+                    <div class="quota-pills">
+                        {foreach name="hdPayTypeList" item="quotaLabel" key="quotaKey"}
+                        <span class="quota-pill{eq name="hdPayType" value="$quotaKey"} active{/eq}" data-value="{$quotaKey|htmlentities}">{$quotaLabel|htmlentities}</span>
+                        {/foreach}
+                    </div>
+                </div>
+                {/if}
+            </div>
+            {/foreach}
+            <span class="help-block">{:__('Enabled pay types help')}</span>
+        </div>
+    </div>
+
+    <div class="form-group layer-footer">
+        <label class="control-label col-xs-12 col-sm-3"></label>
+        <div class="col-xs-12 col-sm-8">
+            <button type="submit" class="btn btn-success btn-embossed">{:__('OK')}</button>
+        </div>
+    </div>
+</form>

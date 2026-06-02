@@ -41,6 +41,161 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'moment'], function (
         });
     };
 
+    var escapeHtml = function (text) {
+        return $('<div/>').text(text == null ? '' : String(text)).html();
+    };
+
+    var openPayTypeDetail = function (payload) {
+        payload = payload || {};
+        var items = payload.items || [];
+        var html = '<div class="pay-type-detail-layer" style="padding:18px 22px;line-height:2;font-size:14px;">';
+        html += '<p><strong>' + __('Pay type') + '：</strong>' + escapeHtml(payload.pay_type_text || '-') + '</p>';
+        if (payload.order_id) {
+            html += '<p><strong>' + __('Order no') + '：</strong>' + escapeHtml(payload.order_id) + '</p>';
+        }
+        $.each(items, function (i, item) {
+            var label = escapeHtml(item.label || '');
+            var val = item.value == null || item.value === '' ? '-' : String(item.value);
+            var valHtml;
+            if (item.is_url && val !== '-') {
+                valHtml = '<a href="' + escapeHtml(val) + '" target="_blank" rel="noopener">' + escapeHtml(val) + '</a>';
+            } else {
+                valHtml = escapeHtml(val);
+            }
+            html += '<p><strong>' + label + '：</strong>' + valHtml + '</p>';
+        });
+        html += '</div>';
+        Layer.open({
+            type: 1,
+            title: __('Pay type detail'),
+            area: ['520px', 'auto'],
+            shadeClose: true,
+            content: html
+        });
+    };
+
+    var parsePayTypeInfo = function (raw) {
+        raw = $.trim(raw == null ? '' : String(raw));
+        if (!raw || raw === '0') {
+            return null;
+        }
+        try {
+            var obj = JSON.parse(raw);
+            return $.isPlainObject(obj) ? obj : null;
+        } catch (err) {
+            return null;
+        }
+    };
+
+    var buildAccountPayPayloadFromRow = function (row) {
+        var payTypeList = Config.payTypeList || {};
+        var payTypeId = parseInt(row.pay_type_id, 10);
+        var info = parsePayTypeInfo(row.pay_type_info);
+        if (!info) {
+            Toastr.error(__('Pay type info invalid'));
+            return null;
+        }
+        var accountTypeId = parseInt(info.type_id, 10);
+        return {
+            pay_type_id: payTypeId,
+            pay_type_text: payTypeList[payTypeId] || String(payTypeId),
+            order_id: row.order_id || '',
+            items: [
+                {label: __('Account pay id'), value: info.id != null && info.id !== '' ? String(info.id) : '-'},
+                {label: __('Account pay type'), value: payTypeList[accountTypeId] || String(info.type_id || '-')},
+                {label: __('Account no'), value: info.account ? String(info.account) : '-'},
+                {label: __('Account nickname'), value: info.nickname ? String(info.nickname) : '-'},
+                {label: __('Open bank'), value: info.open_bank ? String(info.open_bank) : '-'}
+            ]
+        };
+    };
+
+    var buildOtherPayPayloadFromRow = function (row) {
+        var payTypeList = Config.payTypeList || {};
+        var payTypeId = parseInt(row.pay_type_id, 10);
+        var raw = $.trim(row.pay_type_info == null ? '' : String(row.pay_type_info));
+        var display = '-';
+        if (raw && raw !== '0') {
+            var info = parsePayTypeInfo(raw);
+            display = info ? JSON.stringify(info, null, 2) : raw;
+        }
+        return {
+            pay_type_id: payTypeId,
+            pay_type_text: payTypeList[payTypeId] || String(payTypeId),
+            order_id: row.order_id || '',
+            items: [{label: __('Pay type info'), value: display}]
+        };
+    };
+
+    var bindPayTypeDetail = function (table) {
+        table.closest('.panel-body, .widget-body').on('click', '.btn-pay-type-detail', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            var id = $(this).data('id');
+            if (!id) {
+                return;
+            }
+            var row = findRowById(table, id);
+            if (!row) {
+                Toastr.error(__('No Results were found'));
+                return;
+            }
+            var payTypeId = parseInt(row.pay_type_id, 10);
+            if (payTypeId > 0 && payTypeId < 4) {
+                var localPayload = buildAccountPayPayloadFromRow(row);
+                if (localPayload) {
+                    openPayTypeDetail(localPayload);
+                }
+                return;
+            }
+            if (payTypeId !== 4) {
+                openPayTypeDetail(buildOtherPayPayloadFromRow(row));
+                return;
+            }
+            var index = Layer.load(1, {shade: [0.1, '#fff']});
+            Fast.api.ajax({
+                url: 'merchant/order/paydetail',
+                data: {ids: id}
+            }, function (data, ret) {
+                Layer.close(index);
+                var payload = (ret && ret.data) ? ret.data : data;
+                openPayTypeDetail(payload);
+            }, function () {
+                Layer.close(index);
+            });
+        });
+    };
+
+    /** 支付方式列：图标与品牌色 */
+    var getPayTypeIconStyle = function (payTypeId) {
+        switch (payTypeId) {
+            case 1:
+                return {icon: 'fa-cc-paypal', color: '#1677FF'};
+            case 2:
+                return {icon: 'fa-wechat', color: '#07C160'};
+            case 3:
+                return {icon: 'fa-credit-card', color: ''};
+            default:
+                if (payTypeId >= 4) {
+                    return {icon: 'fa-shopping-bag', color: '#605ca8'};
+                }
+                return {icon: 'fa-credit-card', color: ''};
+        }
+    };
+
+    var payTypeColumnFormatter = function (value, row) {
+        var payTypeList = Config.payTypeList || {};
+        var payTypeId = parseInt(value, 10);
+        if (!payTypeId) {
+            return '<span class="text-muted">-</span>';
+        }
+        var text = payTypeList[payTypeId] !== undefined ? payTypeList[payTypeId] : String(value);
+        var iconStyle = getPayTypeIconStyle(payTypeId);
+        var colorCss = iconStyle.color ? (' style="color:' + iconStyle.color + ';"') : '';
+        return '<a href="javascript:;" class="btn-pay-type-detail" data-id="' + row.id + '" title="' + escapeHtml(__('Pay type detail')) + '"' + colorCss + '>' +
+            '<i class="fa ' + iconStyle.icon + '"' + colorCss + '></i> ' + escapeHtml(text) + '</a>';
+    };
+
     var bindAppealJudgeDetail = function (table) {
         table.closest('.panel-body, .widget-body').on('click', '.btn-appeal-judge-detail', function (e) {
             e.preventDefault();
@@ -73,6 +228,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'moment'], function (
             {field: 'amount', title: __('Amount'), operate: 'BETWEEN', sortable: true},
             {field: 'task_id', title: __('Task_id'), operate: '='},
             {field: 'counts', title: __('Counts'), operate: false},
+            {
+                field: 'pay_type_id',
+                title: __('Pay type'),
+                operate: '=',
+                searchList: Config.payTypeList,
+                escape: false,
+                formatter: payTypeColumnFormatter
+            },
             {
                 field: 'status',
                 title: __('Order status'),
@@ -198,6 +361,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'moment'], function (
 
             Table.api.bindevent(table);
             bindAppealJudgeDetail(table);
+            bindPayTypeDetail(table);
         },
         appeallist: function () {
             Table.api.init({
@@ -232,6 +396,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'moment'], function (
             });
 
             Table.api.bindevent(table);
+            bindPayTypeDetail(table);
         },
         handle: function () {
             Form.api.bindevent($("#handle-form"), function () {

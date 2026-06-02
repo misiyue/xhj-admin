@@ -2,6 +2,7 @@
 
 namespace app\admin\controller\merchant;
 
+use app\admin\model\MerchantHdOrder as MerchantHdOrderModel;
 use app\admin\model\MerchantOrder as MerchantOrderModel;
 use app\admin\model\MerchantTask as MerchantTaskModel;
 use app\common\controller\Backend;
@@ -24,6 +25,9 @@ class Order extends Backend
     protected $model = null;
 
     protected $searchFields = 'id,order_id,buyer_id,saler_id,task_id';
+
+    /** 宏达支付详情（pay_type_id=4 列表点击，仅需登录） */
+    protected $noNeedRight = ['paydetail'];
 
     public function _initialize()
     {
@@ -193,6 +197,41 @@ class Order extends Backend
     }
 
     /**
+     * 宏达支付详情（pay_type_id=4，按 order_id 查 merchant_hd_order）
+     *
+     * @param string|null $ids
+     */
+    public function paydetail($ids = null)
+    {
+        $ids = $ids !== null && $ids !== '' ? $ids : $this->request->param('ids');
+        $row = $this->model->get($ids);
+        if (!$row) {
+            $this->error(__('No Results were found'));
+        }
+        if ((int)$row['pay_type_id'] !== MerchantOrderModel::PAY_TYPE_HD) {
+            $this->error(__('Invalid parameters'));
+        }
+
+        $orderNo = trim((string)$row['order_id']);
+        if ($orderNo === '') {
+            $this->error(__('Order no empty'));
+        }
+        $hdOrder = (new MerchantHdOrderModel())->where('order_no', $orderNo)->find();
+        if (!$hdOrder) {
+            $this->error(__('Hd order not found'));
+        }
+
+        $payTypeList = MerchantOrderModel::getPayTypeList();
+        $payload = [
+            'pay_type_id'   => MerchantOrderModel::PAY_TYPE_HD,
+            'pay_type_text' => $payTypeList[MerchantOrderModel::PAY_TYPE_HD] ?? '',
+            'order_id'      => $orderNo,
+            'items'         => MerchantHdOrderModel::buildDisplayItems($hdOrder),
+        ];
+        $this->success('', null, $payload);
+    }
+
+    /**
      * 详情
      *
      * @param string|null $ids
@@ -226,7 +265,9 @@ class Order extends Backend
         $yesNoList = MerchantOrderModel::getYesNoList();
 
         $data['status_text'] = $statusList[(int)$data['status']] ?? (string)$data['status'];
-        $data['pay_type_text'] = $payTypeList[(int)($data['pay_type'] ?? 0)] ?? (string)($data['pay_type'] ?? '');
+        $payTypeId = (int)($data['pay_type_id'] ?? 0);
+        $data['pay_type_text'] = $payTypeList[$payTypeId] ?? (string)$payTypeId;
+        $data['pay_type_info_text'] = MerchantOrderModel::formatPayTypeInfoDisplay($data['pay_type_info'] ?? '');
         $data['buy_type_text'] = $buyTypeList[(int)$data['buy_type']] ?? (string)$data['buy_type'];
         $data['appeal_id_text'] = $appealIdList[(int)$data['appeal_id']] ?? (string)$data['appeal_id'];
         $data['wronger_text'] = $wrongerList[(int)$data['wronger']] ?? (string)$data['wronger'];
