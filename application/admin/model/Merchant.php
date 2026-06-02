@@ -194,11 +194,16 @@ class Merchant extends Model
                 $payTypeKey = isset($hdPayTypeList[$hdPayType]) ? $hdPayType : (string)(int)$hdPayType;
                 $result[$code] = ['pay_type' => $payTypeKey];
             } else {
-                $result[$code] = (object)[];
+                $result[$code] = new \stdClass();
             }
         }
 
-        return json_encode($result, JSON_UNESCAPED_UNICODE);
+        $json = json_encode($result, JSON_UNESCAPED_UNICODE);
+        if ($json === false) {
+            throw new \RuntimeException(json_last_error_msg() ?: 'json_encode failed');
+        }
+
+        return $json;
     }
 
     /**

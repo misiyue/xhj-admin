@@ -94,13 +94,13 @@
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-3">{:__('Enabled pay types')}:</label>
         <div class="col-xs-12 col-sm-8 merchant-pay-types">
-            {foreach name="payTypeList" item="label" key="key"}
-            <div class="pay-type-card{if condition="in_array($key, $payTypesChecked)"} active{/if}" data-code="{$key|htmlentities}">
+            {foreach name="payTypeCards" item="card"}
+            <div class="pay-type-card{if condition="$card.checked"} active{/if}" data-code="{$card.code|htmlentities}">
                 <label class="pay-type-head">
-                    <input type="checkbox" class="pay-type-enable" name="pay_types[]" value="{$key|htmlentities}" data-code="{$key|htmlentities}"{if condition="in_array($key, $payTypesChecked)"} checked="checked"{/if}>
-                    <span class="pay-type-name">{$label|htmlentities}</span>
+                    <input type="checkbox" class="pay-type-enable" name="pay_types[]" value="{$card.code|htmlentities}" data-code="{$card.code|htmlentities}"{if condition="$card.checked"} checked="checked"{/if}>
+                    <span class="pay-type-name">{$card.label|htmlentities}</span>
                 </label>
-                {if condition="$key eq 'hd'"}
+                {if condition="$card.is_hd"}
                 <div class="pay-type-extra" id="pay-type-extra-hd">
                     <div class="quota-title"><i class="fa fa-sliders"></i>{:__('Hd pay quota')}</div>
                     <input type="hidden" name="pay_types_hd_pay_type" id="pay-types-hd-pay-type" value="{$hdPayType|htmlentities}">
