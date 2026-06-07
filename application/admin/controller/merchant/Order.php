@@ -60,7 +60,6 @@ class Order extends Backend
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $list = $this->model
                 ->where($where)
-                ->whereRaw('(is_appeal = 0 OR (is_appeal = 1 AND judge_time > 0))')
                 ->order($sort, $order)
                 ->paginate($limit);
             $result = array("total" => $list->total(), "rows" => $list->items());

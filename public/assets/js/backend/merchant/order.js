@@ -160,6 +160,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'moment'], function (
                 Layer.close(index);
                 var payload = (ret && ret.data) ? ret.data : data;
                 openPayTypeDetail(payload);
+                return false;
             }, function () {
                 Layer.close(index);
             });
@@ -252,6 +253,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'moment'], function (
                 formatter: function (value, row) {
                     if (parseInt(row.is_appeal, 10) !== 1) {
                         return '<span class="label label-default">' + __('Wronger none') + '</span>';
+                    }
+                    if (parseInt(row.judge_time, 10) === 0) {
+                        return '<span class="label label-warning">' + __('Status appealing') + '</span>';
                     }
                     var judgeAttr = $('<div/>').text($.trim(row.judge || '')).html();
                     return '<a href="javascript:;" class="btn btn-xs btn-warning btn-appeal-judge-detail" ' +
