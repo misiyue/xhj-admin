@@ -27,6 +27,7 @@ class Merchant extends Backend
         $this->model = new MerchantModel;
         $this->assignconfig('payTypeList', MerchantModel::getPayTypeList());
         $this->assignconfig('hdPayTypeList', MerchantModel::getHdPayTypeList());
+        $this->assignconfig('hdPayChannelList', MerchantModel::getHdPayChannelList());
     }
 
     /**
@@ -230,7 +231,7 @@ class Merchant extends Backend
         }
         $this->view->assign('row', $data);
         $this->view->assign('payTypeCards', $payTypeCards);
-        $this->view->assign('hdPayTypeList', MerchantModel::getHdPayTypeList());
+        $this->view->assign('hdPayChannelOptions', MerchantModel::getHdPayChannelOptionsForView());
         $this->view->assign('hdPayType', $hdPayType);
         return $this->view->fetch();
     }

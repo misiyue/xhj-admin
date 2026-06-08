@@ -23,15 +23,116 @@ class Merchant extends Model
     }
 
     /**
-     * 宏达支付额度
+     * 宏达支付通道（分组）
+     *
+     * @return array<int, array{channels: array<string, array{name:string,min:int,max:int}>}>
+     */
+    public static function getHdPayChannelGroups()
+    {
+        return [
+            [
+                'channels' => [
+                    '801' => ['name' => '小额', 'min' => 200, 'max' => 1000],
+                    '802' => ['name' => '中额', 'min' => 500, 'max' => 3000],
+                    '803' => ['name' => '大额', 'min' => 800, 'max' => 20000],
+                ],
+            ],
+            [
+                'channels' => [
+                    '1001' => ['name' => '小额金条', 'min' => 100, 'max' => 1000],
+                    '1002' => ['name' => '小额金条', 'min' => 200, 'max' => 2000],
+                    '1003' => ['name' => '中额金条', 'min' => 300, 'max' => 3000],
+                    '1004' => ['name' => '中大额金条', 'min' => 500, 'max' => 3000],
+                    '1005' => ['name' => '大额金条', 'min' => 800, 'max' => 3000],
+                ],
+            ],
+            [
+                'channels' => [
+                    '301' => ['name' => '小额银联扫码', 'min' => 50, 'max' => 500],
+                    '302' => ['name' => '中额银联扫码', 'min' => 100, 'max' => 500],
+                    '303' => ['name' => '大额银联扫码', 'min' => 200, 'max' => 500],
+                ],
+            ],
+            [
+                'channels' => [
+                    '1304' => ['name' => '数字货币', 'min' => 10, 'max' => 2000],
+                ],
+            ],
+            [
+                'channels' => [
+                    '201' => ['name' => '微信', 'min' => 100, 'max' => 2000],
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * 宏达支付通道 code => 配置
+     *
+     * @return array<string, array{name:string,min:int,max:int}>
+     */
+    public static function getHdPayChannelList()
+    {
+        $list = [];
+        foreach (self::getHdPayChannelGroups() as $group) {
+            foreach ($group['channels'] as $code => $channel) {
+                $list[(string)$code] = $channel;
+            }
+        }
+        return $list;
+    }
+
+    /**
+     * @param string|int $code
+     * @return array{name:string,min:int,max:int}|null
+     */
+    public static function getHdPayChannel($code)
+    {
+        $code = trim((string)$code);
+        if ($code === '') {
+            return null;
+        }
+        $list = self::getHdPayChannelList();
+        if (isset($list[$code])) {
+            return $list[$code];
+        }
+        return $list[(string)(int)$code] ?? null;
+    }
+
+    /**
+     * 编辑页通道选项（含分组起始标记）
+     *
+     * @return array<int, array{code:string,name:string,min:int,max:int,group_start:bool}>
+     */
+    public static function getHdPayChannelOptionsForView()
+    {
+        $options = [];
+        foreach (self::getHdPayChannelGroups() as $groupIndex => $group) {
+            $firstInGroup = true;
+            foreach ($group['channels'] as $code => $channel) {
+                $options[] = [
+                    'code'         => (string)$code,
+                    'name'         => $channel['name'],
+                    'min'          => (int)$channel['min'],
+                    'max'          => (int)$channel['max'],
+                    'group_start'  => $firstInGroup && $groupIndex > 0,
+                ];
+                $firstInGroup = false;
+            }
+        }
+        return $options;
+    }
+
+    /**
+     * 宏达支付通道名称（兼容旧调用）
      */
     public static function getHdPayTypeList()
     {
-        return [
-            '801' => __('Hd quota 801'),
-            '802' => __('Hd quota 802'),
-            '803' => __('Hd quota 803'),
-        ];
+        $list = [];
+        foreach (self::getHdPayChannelList() as $code => $channel) {
+            $list[$code] = $channel['name'];
+        }
+        return $list;
     }
 
     /**
@@ -68,7 +169,9 @@ class Merchant extends Model
                 if (!in_array($code, $allowed, true)) {
                     continue;
                 }
-                $result[$code] = $code === self::PAY_TYPE_HD ? ['pay_type' => ''] : [];
+                $result[$code] = $code === self::PAY_TYPE_HD
+                    ? ['pay_type' => '', 'min' => 0, 'max' => 0]
+                    : [];
             }
             return $result;
         }
@@ -80,10 +183,25 @@ class Merchant extends Model
             }
             if ($code === self::PAY_TYPE_HD) {
                 $payType = '';
-                if (is_array($cfg) && isset($cfg['pay_type'])) {
-                    $payType = trim((string)$cfg['pay_type']);
+                $min = null;
+                $max = null;
+                if (is_array($cfg)) {
+                    if (isset($cfg['pay_type'])) {
+                        $payType = trim((string)$cfg['pay_type']);
+                    }
+                    if (isset($cfg['min'])) {
+                        $min = (int)$cfg['min'];
+                    }
+                    if (isset($cfg['max'])) {
+                        $max = (int)$cfg['max'];
+                    }
                 }
-                $result[$code] = ['pay_type' => $payType];
+                $channel = $payType !== '' ? self::getHdPayChannel($payType) : null;
+                $result[$code] = [
+                    'pay_type' => $payType,
+                    'min'      => $min !== null ? $min : ($channel['min'] ?? 0),
+                    'max'      => $max !== null ? $max : ($channel['max'] ?? 0),
+                ];
             } else {
                 $result[$code] = [];
             }
@@ -112,15 +230,16 @@ class Merchant extends Model
     public static function buildPayTypesDisplayLabels(array $payTypesData)
     {
         $typeList = self::getPayTypeList();
-        $hdQuotas = self::getHdPayTypeList();
         $labels = [];
         foreach ($payTypesData as $code => $cfg) {
             $name = $typeList[$code] ?? $code;
             if ($code === self::PAY_TYPE_HD) {
                 $payType = is_array($cfg) ? trim((string)($cfg['pay_type'] ?? '')) : '';
-                $quotaLabel = $hdQuotas[$payType] ?? $hdQuotas[(int)$payType] ?? null;
-                if ($payType !== '' && $quotaLabel !== null) {
-                    $labels[] = $name . ' · ' . $quotaLabel;
+                $channel = $payType !== '' ? self::getHdPayChannel($payType) : null;
+                if ($channel) {
+                    $min = is_array($cfg) && isset($cfg['min']) ? (int)$cfg['min'] : $channel['min'];
+                    $max = is_array($cfg) && isset($cfg['max']) ? (int)$cfg['max'] : $channel['max'];
+                    $labels[] = $name . ' · 【' . $payType . '】' . $channel['name'] . ' (' . $min . '-' . $max . ')';
                 } else {
                     $labels[] = $name;
                 }
@@ -163,8 +282,8 @@ class Merchant extends Model
         if ($hdPayType === '') {
             return false;
         }
-        $list = self::getHdPayTypeList();
-        return isset($list[$hdPayType]) || isset($list[(int)$hdPayType]);
+        $list = self::getHdPayChannelList();
+        return isset($list[$hdPayType]) || isset($list[(string)(int)$hdPayType]);
     }
 
     /**
@@ -183,16 +302,22 @@ class Merchant extends Model
         }
 
         $hdPayType = self::normalizeHdPayType($hdPayType);
-        $hdPayTypeList = self::getHdPayTypeList();
         $result = [];
 
         foreach ($enabledCodes as $code) {
             if ($code === self::PAY_TYPE_HD) {
-                if (!isset($hdPayTypeList[$hdPayType]) && !isset($hdPayTypeList[(int)$hdPayType])) {
+                $payTypeKey = isset(self::getHdPayChannelList()[$hdPayType])
+                    ? $hdPayType
+                    : (string)(int)$hdPayType;
+                $channel = self::getHdPayChannel($payTypeKey);
+                if ($channel === null) {
                     throw new \InvalidArgumentException('Hd pay type required');
                 }
-                $payTypeKey = isset($hdPayTypeList[$hdPayType]) ? $hdPayType : (string)(int)$hdPayType;
-                $result[$code] = ['pay_type' => $payTypeKey];
+                $result[$code] = [
+                    'pay_type' => $payTypeKey,
+                    'min'      => (int)$channel['min'],
+                    'max'      => (int)$channel['max'],
+                ];
             } else {
                 $result[$code] = new \stdClass();
             }
