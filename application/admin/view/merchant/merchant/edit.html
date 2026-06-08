@@ -48,30 +48,53 @@
     flex-wrap: wrap;
     gap: 10px;
 }
+.merchant-pay-types .quota-group-divider {
+    border: 0;
+    border-top: 1px dashed #dce3eb;
+    margin: 12px 0;
+}
 .merchant-pay-types .quota-pill {
-    display: inline-block;
-    min-width: 88px;
-    padding: 7px 16px;
-    border-radius: 999px;
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 168px;
+    max-width: 220px;
+    padding: 10px 14px;
+    border-radius: 8px;
     border: 1px solid #dcdfe6;
     background: #fff;
     color: #606266;
     font-size: 13px;
-    line-height: 1.4;
+    line-height: 1.35;
     text-align: center;
     cursor: pointer;
     user-select: none;
     transition: all .2s ease;
 }
+.merchant-pay-types .quota-pill-name {
+    font-weight: 600;
+    color: #303133;
+}
+.merchant-pay-types .quota-pill-limit {
+    margin-top: 4px;
+    font-size: 11px;
+    color: #909399;
+}
 .merchant-pay-types .quota-pill:hover {
     border-color: #18bc9c;
+}
+.merchant-pay-types .quota-pill:hover .quota-pill-name {
     color: #18bc9c;
 }
 .merchant-pay-types .quota-pill.active {
     background: #18bc9c;
     border-color: #18bc9c;
-    color: #fff;
     box-shadow: 0 2px 8px rgba(24, 188, 156, .35);
+}
+.merchant-pay-types .quota-pill.active .quota-pill-name,
+.merchant-pay-types .quota-pill.active .quota-pill-limit {
+    color: #fff;
 }
 </style>
 
@@ -102,11 +125,15 @@
                 </label>
                 {if condition="$card.is_hd"}
                 <div class="pay-type-extra" id="pay-type-extra-hd">
-                    <div class="quota-title"><i class="fa fa-sliders"></i>{:__('Hd pay quota')}</div>
+                    <div class="quota-title"><i class="fa fa-sliders"></i>{:__('Hd pay channel')}</div>
                     <input type="hidden" name="pay_types_hd_pay_type" id="pay-types-hd-pay-type" value="{$hdPayType|htmlentities}">
                     <div class="quota-pills">
-                        {foreach name="hdPayTypeList" item="quotaLabel" key="quotaKey"}
-                        <span class="quota-pill{eq name="hdPayType" value="$quotaKey"} active{/eq}" data-value="{$quotaKey|htmlentities}">{$quotaLabel|htmlentities}</span>
+                        {foreach name="hdPayChannelOptions" item="opt"}
+                        {if condition="$opt.group_start"}<hr class="quota-group-divider">{/if}
+                        <span class="quota-pill{eq name="hdPayType" value="$opt.code"} active{/eq}" data-value="{$opt.code|htmlentities}" data-min="{$opt.min|htmlentities}" data-max="{$opt.max|htmlentities}">
+                            <span class="quota-pill-name">【{$opt.code|htmlentities}】{$opt.name|htmlentities}</span>
+                            <span class="quota-pill-limit">{:__('Hd channel limit')} {$opt.min|htmlentities} - {$opt.max|htmlentities}</span>
+                        </span>
                         {/foreach}
                     </div>
                 </div>
