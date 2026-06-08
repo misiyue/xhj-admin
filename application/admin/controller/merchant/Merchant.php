@@ -25,6 +25,8 @@ class Merchant extends Backend
     {
         parent::_initialize();
         $this->model = new MerchantModel;
+        $this->assignconfig('payTypeList', MerchantModel::getPayTypeList());
+        $this->assignconfig('hdPayTypeList', MerchantModel::getHdPayTypeList());
     }
 
     /**
@@ -43,7 +45,15 @@ class Merchant extends Backend
                 ->where('status', 1)
                 ->order($sort, $order)
                 ->paginate($limit);
-            $result = array("total" => $list->total(), "rows" => $list->items());
+            $rows = [];
+            foreach ($list->items() as $item) {
+                $row = $item instanceof \think\Model ? $item->toArray() : (array)$item;
+                $payTypesData = MerchantModel::parsePayTypesData($row['pay_types'] ?? '');
+                $row['pay_types_list'] = array_keys($payTypesData);
+                $row['pay_types_labels'] = MerchantModel::buildPayTypesDisplayLabels($payTypesData);
+                $rows[] = $row;
+            }
+            $result = ['total' => $list->total(), 'rows' => $rows];
 
             return json($result);
         }
@@ -151,6 +161,77 @@ class Merchant extends Backend
         $data['backimage_url'] = $row['backimage'] ? cdnurl($row['backimage'], true) : '';
 
         $this->view->assign('row', $data);
+        return $this->view->fetch();
+    }
+
+    /**
+     * 编辑开通支付（仅审核通过商户）
+     *
+     * @param string|null $ids
+     * @return mixed
+     */
+    public function edit($ids = null)
+    {
+        $ids = $ids !== null && $ids !== '' ? $ids : $this->request->param('ids');
+        $row = $this->model->get($ids);
+        if (!$row) {
+            $this->error(__('No Results were found'));
+        }
+        if ((int)$row['status'] !== 1) {
+            $this->error(__('Only approved merchant can be edited'));
+        }
+
+        if ($this->request->isPost()) {
+            $this->token();
+            $postIds = $this->request->post('ids', $ids);
+            if ((string)$postIds !== (string)$row['id']) {
+                $this->error(__('Invalid parameters'));
+            }
+            $payTypes = $this->request->post('pay_types/a', []);
+            if ($payTypes === [] || $payTypes === null) {
+                $payTypes = $this->request->post('pay_types', []);
+            }
+            $hdPayType = $this->request->post('pay_types_hd_pay_type', '');
+            $enabledCodes = MerchantModel::normalizeEnabledCodes($payTypes);
+            if (in_array(MerchantModel::PAY_TYPE_HD, $enabledCodes, true)
+                && !MerchantModel::isValidHdPayType($hdPayType)) {
+                $this->error(__('Hd pay type required'));
+            }
+            try {
+                $payTypesJson = MerchantModel::encodePayTypesConfig($enabledCodes, $hdPayType);
+                $this->model
+                    ->where('id', $row['id'])
+                    ->where('status', 1)
+                    ->update(['pay_types' => $payTypesJson]);
+            } catch (\InvalidArgumentException $e) {
+                $this->error(__('Hd pay type required'));
+            } catch (\think\exception\HttpResponseException $e) {
+                throw $e;
+            } catch (\Exception $e) {
+                $this->error($e->getMessage() ?: __('Operation failed'));
+            }
+            $this->success();
+        }
+
+        $data = $row->toArray();
+        $payTypesData = MerchantModel::parsePayTypesData($data['pay_types'] ?? '');
+        $hdPayType = isset($payTypesData[MerchantModel::PAY_TYPE_HD]['pay_type'])
+            ? (string)$payTypesData[MerchantModel::PAY_TYPE_HD]['pay_type']
+            : '';
+        $payTypesChecked = array_keys($payTypesData);
+        $payTypeCards = [];
+        foreach (MerchantModel::getPayTypeList() as $code => $label) {
+            $payTypeCards[] = [
+                'code'    => $code,
+                'label'   => $label,
+                'checked' => in_array($code, $payTypesChecked, true),
+                'is_hd'   => $code === MerchantModel::PAY_TYPE_HD,
+            ];
+        }
+        $this->view->assign('row', $data);
+        $this->view->assign('payTypeCards', $payTypeCards);
+        $this->view->assign('hdPayTypeList', MerchantModel::getHdPayTypeList());
+        $this->view->assign('hdPayType', $hdPayType);
         return $this->view->fetch();
     }
 }
