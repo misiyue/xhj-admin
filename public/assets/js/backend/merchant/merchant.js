@@ -109,18 +109,16 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
         edit: function () {
             var $form = $("#edit-form");
 
-            var $hdPayTypeInput = $form.find('#pay-types-hd-pay-type');
-
-            var getHdQuotaValue = function () {
-                return $.trim($hdPayTypeInput.val() || '');
+            var getPaymentValue = function ($card) {
+                return $.trim($card.find('.payment-id-input').val() || '');
             };
 
-            var setHdQuotaValue = function (value) {
+            var setPaymentValue = function ($card, value) {
                 value = $.trim(value || '');
-                $hdPayTypeInput.val(value);
-                $form.find('.quota-pill').removeClass('active');
+                $card.find('.payment-id-input').val(value);
+                $card.find('.quota-pill').removeClass('active');
                 if (value) {
-                    $form.find('.quota-pill[data-value="' + value + '"]').addClass('active');
+                    $card.find('.quota-pill[data-value="' + value + '"]').addClass('active');
                 }
             };
 
@@ -135,7 +133,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             $extra.stop(true, true).slideDown(180);
                         } else {
                             $extra.stop(true, true).slideUp(150);
-                            setHdQuotaValue('');
+                            setPaymentValue($card, '');
                         }
                     }
                 });
@@ -143,21 +141,33 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
 
             $form.on('change', '.pay-type-enable', syncPayTypeCards);
             $form.on('click', '.quota-pill', function () {
-                setHdQuotaValue($(this).data('value'));
+                var $card = $(this).closest('.pay-type-card');
+                setPaymentValue($card, $(this).data('value'));
+            });
+
+            $form.find('.pay-type-card').each(function () {
+                var $card = $(this);
+                if ($card.find('.pay-type-enable').is(':checked') && !getPaymentValue($card)) {
+                    var $firstPill = $card.find('.quota-pill').first();
+                    if ($firstPill.length) {
+                        setPaymentValue($card, $firstPill.data('value'));
+                    }
+                } else {
+                    setPaymentValue($card, getPaymentValue($card));
+                }
             });
             syncPayTypeCards();
-            if ($form.find('.pay-type-enable[data-code="hd"]').is(':checked') && !getHdQuotaValue()) {
-                var $firstPill = $form.find('.quota-pill').first();
-                if ($firstPill.length) {
-                    setHdQuotaValue($firstPill.data('value'));
-                }
-            } else {
-                setHdQuotaValue(getHdQuotaValue());
-            }
 
             Form.api.bindevent($form, function () {
-                if ($form.find('.pay-type-enable[data-code="hd"]').is(':checked') && !getHdQuotaValue()) {
-                    Layer.msg(__('Hd pay type required'));
+                var valid = true;
+                $form.find('.pay-type-card').each(function () {
+                    var $card = $(this);
+                    if ($card.find('.pay-type-enable').is(':checked') && $card.find('.quota-pill').length && !getPaymentValue($card)) {
+                        valid = false;
+                    }
+                });
+                if (!valid) {
+                    Layer.msg(__('Payment channel required'));
                     return false;
                 }
                 parent.$(".btn-refresh").trigger("click");

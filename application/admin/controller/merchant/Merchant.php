@@ -3,6 +3,7 @@
 namespace app\admin\controller\merchant;
 
 use app\admin\model\Merchant as MerchantModel;
+use app\admin\model\MerchantPayment as MerchantPaymentModel;
 use app\admin\model\Users;
 use app\common\controller\Backend;
 use app\common\library\WalletApi;
@@ -25,9 +26,6 @@ class Merchant extends Backend
     {
         parent::_initialize();
         $this->model = new MerchantModel;
-        $this->assignconfig('payTypeList', MerchantModel::getPayTypeList());
-        $this->assignconfig('hdPayTypeList', MerchantModel::getHdPayTypeList());
-        $this->assignconfig('hdPayChannelList', MerchantModel::getHdPayChannelList());
     }
 
     /**
@@ -50,7 +48,6 @@ class Merchant extends Backend
             foreach ($list->items() as $item) {
                 $row = $item instanceof \think\Model ? $item->toArray() : (array)$item;
                 $payTypesData = MerchantModel::parsePayTypesData($row['pay_types'] ?? '');
-                $row['pay_types_list'] = array_keys($payTypesData);
                 $row['pay_types_labels'] = MerchantModel::buildPayTypesDisplayLabels($payTypesData);
                 $rows[] = $row;
             }
@@ -192,20 +189,24 @@ class Merchant extends Backend
             if ($payTypes === [] || $payTypes === null) {
                 $payTypes = $this->request->post('pay_types', []);
             }
-            $hdPayType = $this->request->post('pay_types_hd_pay_type', '');
+            $paymentIds = $this->request->post('pay_types_payment/a', []);
+            if (!is_array($paymentIds)) {
+                $paymentIds = [];
+            }
             $enabledCodes = MerchantModel::normalizeEnabledCodes($payTypes);
-            if (in_array(MerchantModel::PAY_TYPE_HD, $enabledCodes, true)
-                && !MerchantModel::isValidHdPayType($hdPayType)) {
-                $this->error(__('Hd pay type required'));
+            foreach ($enabledCodes as $code) {
+                if (!MerchantModel::isValidPaymentId($paymentIds[$code] ?? 0, $code)) {
+                    $this->error(__('Payment channel required'));
+                }
             }
             try {
-                $payTypesJson = MerchantModel::encodePayTypesConfig($enabledCodes, $hdPayType);
+                $payTypesJson = MerchantModel::encodePayTypesConfig($enabledCodes, $paymentIds);
                 $this->model
                     ->where('id', $row['id'])
                     ->where('status', 1)
                     ->update(['pay_types' => $payTypesJson]);
             } catch (\InvalidArgumentException $e) {
-                $this->error(__('Hd pay type required'));
+                $this->error(__('Payment channel required'));
             } catch (\think\exception\HttpResponseException $e) {
                 throw $e;
             } catch (\Exception $e) {
@@ -216,23 +217,19 @@ class Merchant extends Backend
 
         $data = $row->toArray();
         $payTypesData = MerchantModel::parsePayTypesData($data['pay_types'] ?? '');
-        $hdPayType = isset($payTypesData[MerchantModel::PAY_TYPE_HD]['pay_type'])
-            ? (string)$payTypesData[MerchantModel::PAY_TYPE_HD]['pay_type']
-            : '';
         $payTypesChecked = array_keys($payTypesData);
         $payTypeCards = [];
-        foreach (MerchantModel::getPayTypeList() as $code => $label) {
+        foreach (MerchantPaymentModel::getPlatformList() as $code => $label) {
             $payTypeCards[] = [
-                'code'    => $code,
-                'label'   => $label,
-                'checked' => in_array($code, $payTypesChecked, true),
-                'is_hd'   => $code === MerchantModel::PAY_TYPE_HD,
+                'code'             => $code,
+                'label'            => $label,
+                'checked'          => in_array($code, $payTypesChecked, true),
+                'payment_id'       => (int)($payTypesData[$code] ?? 0),
+                'payment_options'  => MerchantModel::getPaymentOptionsForView($code),
             ];
         }
         $this->view->assign('row', $data);
         $this->view->assign('payTypeCards', $payTypeCards);
-        $this->view->assign('hdPayChannelOptions', MerchantModel::getHdPayChannelOptionsForView());
-        $this->view->assign('hdPayType', $hdPayType);
         return $this->view->fetch();
     }
 }

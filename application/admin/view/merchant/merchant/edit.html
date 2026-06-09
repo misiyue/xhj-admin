@@ -48,11 +48,6 @@
     flex-wrap: wrap;
     gap: 10px;
 }
-.merchant-pay-types .quota-group-divider {
-    border: 0;
-    border-top: 1px dashed #dce3eb;
-    margin: 12px 0;
-}
 .merchant-pay-types .quota-pill {
     display: inline-flex;
     flex-direction: column;
@@ -123,19 +118,22 @@
                     <input type="checkbox" class="pay-type-enable" name="pay_types[]" value="{$card.code|htmlentities}" data-code="{$card.code|htmlentities}"{if condition="$card.checked"} checked="checked"{/if}>
                     <span class="pay-type-name">{$card.label|htmlentities}</span>
                 </label>
-                {if condition="$card.is_hd"}
-                <div class="pay-type-extra" id="pay-type-extra-hd">
-                    <div class="quota-title"><i class="fa fa-sliders"></i>{:__('Hd pay channel')}</div>
-                    <input type="hidden" name="pay_types_hd_pay_type" id="pay-types-hd-pay-type" value="{$hdPayType|htmlentities}">
+                {if condition="!empty($card.payment_options)"}
+                <div class="pay-type-extra" id="pay-type-extra-{$card.code|htmlentities}">
+                    <div class="quota-title"><i class="fa fa-sliders"></i>{:__('Pay channel select')}</div>
+                    <input type="hidden" class="payment-id-input" name="pay_types_payment[{$card.code|htmlentities}]" id="pay-types-payment-{$card.code|htmlentities}" value="{$card.payment_id|htmlentities}">
                     <div class="quota-pills">
-                        {foreach name="hdPayChannelOptions" item="opt"}
-                        {if condition="$opt.group_start"}<hr class="quota-group-divider">{/if}
-                        <span class="quota-pill{eq name="hdPayType" value="$opt.code"} active{/eq}" data-value="{$opt.code|htmlentities}" data-min="{$opt.min|htmlentities}" data-max="{$opt.max|htmlentities}">
+                        {foreach name="card.payment_options" item="opt"}
+                        <span class="quota-pill{eq name="card.payment_id" value="$opt.id"} active{/eq}" data-value="{$opt.id|htmlentities}">
                             <span class="quota-pill-name">【{$opt.code|htmlentities}】{$opt.name|htmlentities}</span>
-                            <span class="quota-pill-limit">{:__('Hd channel limit')} {$opt.min|htmlentities} - {$opt.max|htmlentities}</span>
+                            <span class="quota-pill-limit">{:__('Channel limit')} {$opt.min|htmlentities} - {$opt.max|htmlentities}</span>
                         </span>
                         {/foreach}
                     </div>
+                </div>
+                {elseif condition="$card.checked"/}
+                <div class="pay-type-extra">
+                    <p class="text-muted help-block" style="margin:10px 0 0;">{:__('No payment channel configured')}</p>
                 </div>
                 {/if}
             </div>
