@@ -194,19 +194,12 @@ class Merchant extends Backend
                 $paymentIds = [];
             }
             $enabledCodes = MerchantModel::normalizeEnabledCodes($payTypes);
-            foreach ($enabledCodes as $code) {
-                if (!MerchantModel::isValidPaymentId($paymentIds[$code] ?? 0, $code)) {
-                    $this->error(__('Payment channel required'));
-                }
-            }
             try {
                 $payTypesJson = MerchantModel::encodePayTypesConfig($enabledCodes, $paymentIds);
                 $this->model
                     ->where('id', $row['id'])
                     ->where('status', 1)
                     ->update(['pay_types' => $payTypesJson]);
-            } catch (\InvalidArgumentException $e) {
-                $this->error(__('Payment channel required'));
             } catch (\think\exception\HttpResponseException $e) {
                 throw $e;
             } catch (\Exception $e) {

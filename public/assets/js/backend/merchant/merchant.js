@@ -159,17 +159,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             syncPayTypeCards();
 
             Form.api.bindevent($form, function () {
-                var valid = true;
-                $form.find('.pay-type-card').each(function () {
-                    var $card = $(this);
-                    if ($card.find('.pay-type-enable').is(':checked') && $card.find('.quota-pill').length && !getPaymentValue($card)) {
-                        valid = false;
-                    }
-                });
-                if (!valid) {
-                    Layer.msg(__('Payment channel required'));
-                    return false;
-                }
                 parent.$(".btn-refresh").trigger("click");
                 var index = parent.Layer.getFrameIndex(window.name);
                 parent.Layer.close(index);

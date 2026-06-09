@@ -163,9 +163,12 @@ class Merchant extends Model
         foreach ($enabledCodes as $code) {
             $paymentId = isset($paymentIds[$code]) ? (int)$paymentIds[$code] : 0;
             if (!self::isValidPaymentId($paymentId, $code)) {
-                throw new \InvalidArgumentException('Payment channel required');
+                continue;
             }
             $result[$code] = $paymentId;
+        }
+        if (!$result) {
+            return null;
         }
 
         $json = json_encode($result, JSON_UNESCAPED_UNICODE);
