@@ -1,0 +1,141 @@
+<form id="detail-form" class="form-horizontal" role="form" method="POST" action="">
+    {:token()}
+    <input type="hidden" name="ids" value="{$row.id|htmlentities}">
+
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-3">{:__('Id')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <p class="form-control-static">{$row.id|htmlentities}</p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-3">{:__('User_id')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <p class="form-control-static">{$row.user_id|htmlentities}</p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-3">{:__('Username')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <p class="form-control-static">{$row.username|htmlentities}</p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-3">{:__('Nickname')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <p class="form-control-static">{$row.nickname|htmlentities}</p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-3">{:__('Mobile')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <p class="form-control-static">{$row.mobile|default='-'|htmlentities}</p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-3">{:__('Email')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <p class="form-control-static">{$row.email|default='-'|htmlentities}</p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-3">{:__('Avatar')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            {if $row.avatar}
+            <p class="form-control-static"><img src="{$row.avatar|htmlentities}" class="img-thumbnail" style="max-height:80px" alt=""></p>
+            {else/}
+            <p class="form-control-static">-</p>
+            {/if}
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-3">{:__('Gender')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <p class="form-control-static">{$row.gender_text|htmlentities}</p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-3">{:__('Wallet uuid')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <p class="form-control-static">{$row.uuid|htmlentities}</p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-3">{:__('User code')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <p class="form-control-static">{$row.user_code|default='-'|htmlentities}</p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-3">{:__('Money')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <p class="form-control-static">{$row.money|htmlentities}</p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-3">{:__('Invite code')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <p class="form-control-static">{$row.invite_code|default='-'|htmlentities}</p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-3">{:__('Invite user id')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <p class="form-control-static">{$row.invite_user_id|htmlentities}</p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-3">{:__('Bio')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <p class="form-control-static">{$row.motto|default='-'|htmlentities}</p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-3">{:__('Birthday')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <p class="form-control-static">{$row.birthday|default='-'|htmlentities}</p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-3">{:__('Is robot')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <p class="form-control-static">{$row.is_robot_text|htmlentities}</p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-3">{:__('Createtime')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <p class="form-control-static">{$row.created_at|default='-'|htmlentities}</p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-3">{:__('Updatetime')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <p class="form-control-static">{$row.updated_at|default='-'|htmlentities}</p>
+        </div>
+    </div>
+
+    <hr>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-3">{:__('Status')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-status" type="hidden" value="{$row.status|htmlentities}">
+            <a href="javascript:;" data-toggle="switcher" class="btn-switcher btn-user-status" data-input-id="c-status" data-yes="1" data-no="2" data-confirm="{:__('Confirm change status')}">
+                <i class="fa fa-toggle-on text-success {if $row.status != 1}fa-flip-horizontal text-gray{/if} fa-2x"></i>
+            </a>
+            <span class="text-muted" style="margin-left:10px;" id="status-text">{$row.status_text|htmlentities}</span>
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="c-password" class="control-label col-xs-12 col-sm-3">{:__('Reset password')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <div class="input-group">
+                <input id="c-password" class="form-control" name="password" type="password" value="" placeholder="{:__('Reset password placeholder')}" autocomplete="new-password" data-rule="password"/>
+                <span class="input-group-btn">
+                    <button type="button" class="btn btn-warning btn-reset-password">{:__('Reset password')}</button>
+                </span>
+            </div>
+            <span class="help-block">{:__('Reset password help')}</span>
+        </div>
+    </div>
+</form>
