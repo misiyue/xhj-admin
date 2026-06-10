@@ -2,7 +2,6 @@
 
 namespace app\admin\library\traits;
 
-use app\admin\library\Auth;
 use Exception;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
@@ -17,6 +16,24 @@ use think\exception\PDOException;
 use think\exception\ValidateException;
 use think\response\Json;
 
+/**
+ * 后台控制器通用方法（由 app\common\controller\Backend 引入）
+ *
+ * @property \app\admin\library\Auth $auth
+ * @property \think\Model $model
+ * @property \think\Request $request
+ * @property \think\View $view
+ * @property bool $dataLimit
+ * @property string $dataLimitField
+ * @property bool $dataLimitFieldAutoFill
+ * @property bool|string $modelValidate
+ * @property bool $modelSceneValidate
+ * @property string|array $multiFields
+ * @property string|array $excludeFields
+ * @property string $importHeadType
+ *
+ * @method array|null getDataLimitAdminIds()
+ */
 trait Backend
 {
     /**
@@ -458,10 +475,9 @@ trait Backend
                 }
             }
             if ($has_admin_id) {
-                $auth = Auth::instance();
                 foreach ($insert as &$val) {
-                    if (empty($val['admin_id'])) {
-                        $val['admin_id'] = $auth->isLogin() ? $auth->id : 0;
+                    if (!isset($val['admin_id']) || empty($val['admin_id'])) {
+                        $val['admin_id'] = $this->auth->isLogin() ? $this->auth->id : 0;
                     }
                 }
             }

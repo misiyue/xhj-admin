@@ -4,7 +4,9 @@ namespace app\admin\controller\user;
 
 use app\admin\model\Users;
 use app\common\controller\Backend;
-use app\common\library\Auth;
+use fast\Random;
+use think\Db;
+use think\Validate;
 
 /**
  * 会员管理
@@ -68,37 +70,64 @@ class User extends Backend
     }
 
     /**
-     * 编辑
+     * 详情
+     *
+     * @param string|null $ids
+     * @return mixed
      */
-    public function edit($ids = null)
+    public function detail($ids = null)
     {
+        $ids = $ids !== null && $ids !== '' ? $ids : $this->request->param('ids');
+        $row = $this->model->get($ids);
+        if (!$row) {
+            $this->error(__('No Results were found'));
+        }
+
         if ($this->request->isPost()) {
             $this->token();
+            $action = $this->request->post('action', '');
+            if ($action === 'status') {
+                $status = (int)$this->request->post('status');
+                if (!in_array($status, [1, 2], true)) {
+                    $this->error(__('Invalid parameters'));
+                }
+                Db::name('users')->where('id', $row['id'])->update([
+                    'status'     => $status,
+                    'updated_at' => date('Y-m-d H:i:s'),
+                ]);
+                $this->success(__('Status updated'));
+            }
+            if ($action === 'resetpassword') {
+                $password = trim((string)$this->request->post('password', ''));
+                if ($password === '') {
+                    $this->error(__('Password required'));
+                }
+                if (!Validate::is($password, '\S{6,30}')) {
+                    $this->error(__('Password must be 6 to 30 characters'));
+                }
+                $salt = $row['salt'] ?: Random::alnum(16);
+                $encrypted = md5($salt . $password . $salt);
+                Db::name('users')->where('id', $row['id'])->update([
+                    'password'   => $encrypted,
+                    'salt'       => $salt,
+                    'updated_at' => date('Y-m-d H:i:s'),
+                ]);
+                $this->success(__('Password reset success'));
+            }
+            $this->error(__('Invalid parameters'));
         }
-        $row = $this->model->get($ids);
-        $this->modelValidate = true;
-        if (!$row) {
-            $this->error(__('No Results were found'));
-        }
-        return parent::edit($ids);
-    }
 
-    /**
-     * 删除
-     */
-    public function del($ids = "")
-    {
-        if (!$this->request->isPost()) {
-            $this->error(__("Invalid parameters"));
-        }
-        $ids = $ids ? $ids : $this->request->post("ids");
-        $row = $this->model->get($ids);
-        $this->modelValidate = true;
-        if (!$row) {
-            $this->error(__('No Results were found'));
-        }
-        Auth::instance()->delete($row['id']);
-        $this->success();
+        $data = $row->toArray();
+        $data['avatar'] = $data['avatar'] ? cdnurl($data['avatar'], true) : letter_avatar($data['nickname']);
+        $genderList = $this->model->getGenderList();
+        $data['gender_text'] = isset($genderList[(string)$data['gender']]) ? $genderList[(string)$data['gender']] : '-';
+        $statusList = [1 => __('Normal'), 2 => __('Banned')];
+        $data['status_text'] = $statusList[(int)$data['status']] ?? '-';
+        $robotList = [1 => __('Yes'), 2 => __('No')];
+        $data['is_robot_text'] = $robotList[(int)$data['is_robot']] ?? '-';
+
+        $this->view->assign('row', $data);
+        return $this->view->fetch();
     }
 
 }
