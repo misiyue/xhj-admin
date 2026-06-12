@@ -12,4 +12,5 @@ return [
     'Flag c2cChat'  => 'C2C聊天',
     'Flag c2cPaid'  => 'C2C支付',
     'Flag c2cTrans' => 'C2C放币',
+    'Flag contactApply' => '好友添加申请',
 ];

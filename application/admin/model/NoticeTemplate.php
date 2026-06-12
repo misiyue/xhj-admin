@@ -19,7 +19,8 @@ class NoticeTemplate extends Model
             'userChat' => __('Flag userChat'),
             'c2cChat'  => __('Flag c2cChat'),
             'c2cPaid'  => __('Flag c2cPaid'),
-            'c2cTrans' => __('Flag c2cTrans'),
+            'c2cTrans'     => __('Flag c2cTrans'),
+            'contactApply' => __('Flag contactApply'),
         ];
     }
 
