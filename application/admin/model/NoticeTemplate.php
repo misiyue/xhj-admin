@@ -21,6 +21,7 @@ class NoticeTemplate extends Model
             'c2cPaid'  => __('Flag c2cPaid'),
             'c2cTrans'     => __('Flag c2cTrans'),
             'contactApply' => __('Flag contactApply'),
+            'groupApply'   => __('Flag groupApply'),
         ];
     }
 

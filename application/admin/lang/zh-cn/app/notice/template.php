@@ -13,4 +13,5 @@ return [
     'Flag c2cPaid'  => 'C2C支付',
     'Flag c2cTrans' => 'C2C放币',
     'Flag contactApply' => '好友添加申请',
+    'Flag groupApply'   => '群申请',
 ];
