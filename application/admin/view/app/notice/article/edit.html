@@ -10,7 +10,7 @@
     <div class="form-group">
         <label for="c-content" class="control-label col-xs-12 col-sm-2">{:__('Content')}:</label>
         <div class="col-xs-12 col-sm-8">
-            <textarea id="c-content" class="form-control editor" name="row[content]" rows="8" data-rule="required">{$row.content|default=''|htmlentities}</textarea>
+            <textarea id="c-content" class="form-control editor" name="row[content]" rows="8" data-rule="required">{$row.content|default=''|raw}</textarea>
         </div>
     </div>
     <div class="form-group">

@@ -25,15 +25,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'id', title: __('Id'), sortable: true},
                         {field: 'title', title: __('Title'), operate: 'LIKE'},
                         {
-                            field: 'content',
-                            title: __('Content'),
-                            operate: 'LIKE',
-                            class: 'autocontent',
-                            formatter: Table.api.formatter.content,
-                            hover: true,
-                            width: 280
-                        },
-                        {
                             field: 'status',
                             title: __('Status'),
                             searchList: Config.statusList,
@@ -82,7 +73,19 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
         },
         api: {
             bindevent: function () {
-                Form.api.bindevent($("form[role=form]"));
+                var form = $("form[role=form]");
+                form.data('validator-options', $.extend({}, form.data('validator-options') || {}, {
+                    ignore: ':hidden:not(.editor)'
+                }));
+                Form.api.bindevent(form, null, null, function () {
+                    $(".editor", form).each(function () {
+                        var id = $(this).attr("id");
+                        if (window.Simditor && Simditor.list && Simditor.list[id]) {
+                            $(this).val(Simditor.list[id].getValue());
+                        }
+                    });
+                    return true;
+                });
             }
         }
     };
