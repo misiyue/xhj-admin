@@ -32,6 +32,19 @@ class Article extends Backend
         $statusList = NoticeArticleModel::getStatusList();
         $this->view->assign('statusList', $statusList);
         $this->assignconfig('statusList', $statusList);
+        if (empty($this->view->config['simditor'])) {
+            $this->assignconfig('simditor', [
+                'classname'          => '.editor',
+                'height'             => '250',
+                'minHeight'          => 250,
+                'toolbarFloat'       => 0,
+                'toolbar'            => ['title', 'bold', 'italic', 'underline', 'strikethrough', 'fontScale', 'color', '|', 'ol', 'ul', 'blockquote', 'code', 'table', '|', 'link', 'image', 'hr', '|', 'indent', 'outdent', 'alignment'],
+                'mobileToolbar'      => ['bold', 'underline', 'strikethrough', 'color', 'ul', 'ol'],
+                'placeholder'        => '',
+                'isdompurify'        => 0,
+                'allowiframeprefixs' => [],
+            ]);
+        }
     }
 
     /**
