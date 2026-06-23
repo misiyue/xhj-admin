@@ -127,15 +127,27 @@
         </div>
     </div>
     <div class="form-group">
-        <label for="c-password" class="control-label col-xs-12 col-sm-3">{:__('Reset password')}:</label>
+        <label for="c-password" class="control-label col-xs-12 col-sm-3">{:__('Reset login password')}:</label>
         <div class="col-xs-12 col-sm-8">
             <div class="input-group">
-                <input id="c-password" class="form-control" name="password" type="password" value="" placeholder="{:__('Reset password placeholder')}" autocomplete="new-password" data-rule="password"/>
+                <input id="c-password" class="form-control" name="password" type="password" value="" placeholder="{:__('Reset login password placeholder')}" autocomplete="new-password" data-rule="password"/>
                 <span class="input-group-btn">
-                    <button type="button" class="btn btn-warning btn-reset-password">{:__('Reset password')}</button>
+                    <button type="button" class="btn btn-warning btn-reset-password">{:__('Reset login password')}</button>
                 </span>
             </div>
-            <span class="help-block">{:__('Reset password help')}</span>
+            <span class="help-block">{:__('Reset login password help')}</span>
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="c-trans-password" class="control-label col-xs-12 col-sm-3">{:__('Reset transaction password')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <div class="input-group">
+                <input id="c-trans-password" class="form-control" name="trans_password" type="password" value="" placeholder="{:__('Reset transaction password placeholder')}" autocomplete="new-password" data-rule="password"/>
+                <span class="input-group-btn">
+                    <button type="button" class="btn btn-warning btn-reset-trans-password">{:__('Reset transaction password')}</button>
+                </span>
+            </div>
+            <span class="help-block">{:__('Reset transaction password help')}</span>
         </div>
     </div>
 </form>

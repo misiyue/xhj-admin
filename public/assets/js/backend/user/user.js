@@ -115,6 +115,26 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 });
                 return false;
             });
+
+            $(".btn-reset-trans-password").on("click", function () {
+                var password = $.trim($("#c-trans-password").val());
+                if (!password) {
+                    Toastr.error(__('Transaction password required'));
+                    return false;
+                }
+                var ids = $("input[name='ids']").val();
+                Fast.api.ajax({
+                    url: 'user/user/detail/ids/' + ids,
+                    data: {
+                        action: 'resettranspassword',
+                        trans_password: password,
+                        __token__: $("input[name='__token__']").val()
+                    }
+                }, function () {
+                    $("#c-trans-password").val('');
+                });
+                return false;
+            });
         },
         add: function () {
             Controller.api.bindevent();
