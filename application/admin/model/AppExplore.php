@@ -17,9 +17,10 @@ class AppExplore extends Model
     public static function getPositionList()
     {
         return [
-            'indexTop' => __('Position index top'),
+            'indexTop'  => __('Position index top'),
             'indexTMid' => __('Position index mid'),
-            'tab'      => __('Position tab'),
+            'idxBanner' => __('Position index banner'),
+            'tab'       => __('Position tab'),
         ];
     }
 

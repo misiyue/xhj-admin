@@ -11,9 +11,10 @@ return [
     'Position'            => '位置',
     'Position index top'  => '首页顶部',
     'Position index mid'  => '首页中部',
+    'Position index banner' => '首页轮播',
     'Position tab'        => '选项',
     'Position none'       => '未选择',
-    'Position invalid'    => '位置须为 indexTop、indexTMid、tab 之一，或留空',
+    'Position invalid'    => '位置须为 indexTop、indexTMid、idxBanner、tab 之一，或留空',
     'Explore open yes' => '是',
     'Explore open no'  => '否',
 ];

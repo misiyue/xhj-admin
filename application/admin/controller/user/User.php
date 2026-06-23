@@ -114,6 +114,27 @@ class User extends Backend
                 ]);
                 $this->success(__('Password reset success'));
             }
+            if ($action === 'resettranspassword') {
+                $password = trim((string)$this->request->post('trans_password', ''));
+                if ($password === '') {
+                    $this->error(__('Transaction password required'));
+                }
+                if (!Validate::is($password, '\S{6,30}')) {
+                    $this->error(__('Password must be 6 to 30 characters'));
+                }
+                $salt = $row['salt'] ?: Random::alnum(16);
+                $encrypted = md5($salt . $password . $salt);
+                $update = [
+                    'trans'      => $encrypted,
+                    'is_trans'   => 1,
+                    'updated_at' => date('Y-m-d H:i:s'),
+                ];
+                if (!$row['salt']) {
+                    $update['salt'] = $salt;
+                }
+                Db::name('users')->where('id', $row['id'])->update($update);
+                $this->success(__('Transaction password reset success'));
+            }
             $this->error(__('Invalid parameters'));
         }
 

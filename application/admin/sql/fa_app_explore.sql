@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS `fa_app_explore` (
   `image` varchar(255) DEFAULT NULL COMMENT '图片',
   `url` varchar(255) DEFAULT NULL COMMENT '链接',
   `is_open` tinyint(4) DEFAULT NULL COMMENT '是否开放：1-是，2-否',
-  `position` varchar(16) DEFAULT NULL COMMENT '位置：indexTop-首页顶部，indexTMid-首页中部，tab-选项',
+  `position` varchar(16) DEFAULT NULL COMMENT '位置：indexTop-首页顶部，indexTMid-首页中部，idxBanner-首页轮播，tab-选项',
   `sort` int(11) NOT NULL DEFAULT '0' COMMENT '排序，越大越靠前',
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
