@@ -36,7 +36,7 @@ class AppExplore extends Validate
     }
 
     /**
-     * 位置：空或 indexTop / indexTMid / tab
+     * 位置：空或 indexTop / indexTMid / idxBanner / tab
      */
     protected function checkPosition($value, $rule, $data = [], $field = '', $title = '')
     {
@@ -46,7 +46,7 @@ class AppExplore extends Validate
         if (!is_string($value) || strlen($value) > 16) {
             return __('Position invalid');
         }
-        if (!in_array($value, ['indexTop', 'indexTMid', 'tab'], true)) {
+        if (!in_array($value, ['indexTop', 'indexTMid', 'idxBanner', 'tab'], true)) {
             return __('Position invalid');
         }
         return true;
