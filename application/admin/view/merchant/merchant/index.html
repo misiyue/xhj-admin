@@ -8,7 +8,13 @@
                     <div id="toolbar" class="toolbar">
                         {:build_toolbar('refresh')}
                         {if $auth->check('merchant/merchant/auditlist')}
-                        <a href="merchant/merchant/auditlist" class="btn btn-warning btn-dialog" title="{:__('Merchant audit apply')}" data-area='["90%","85%"]'><i class="fa fa-gavel"></i> {:__('Merchant audit apply')}</a>
+                        <a href="merchant/merchant/auditlist" class="btn btn-warning btn-dialog" title="{:__('Entry audit')}" data-area='["90%","85%"]'><i class="fa fa-gavel"></i> {:__('Entry audit')}</a>
+                        {/if}
+                        {if $auth->check('merchant/merchant/cancelauditlist')}
+                        <a href="merchant/merchant/cancelauditlist" class="btn btn-danger btn-dialog" title="{:__('Cancel audit')}" data-area='["90%","85%"]'><i class="fa fa-sign-out"></i> {:__('Cancel audit')}</a>
+                        {/if}
+                        {if $auth->check('merchant/merchant/cancelledlist')}
+                        <a href="merchant/merchant/cancelledlist" class="btn btn-default btn-dialog" title="{:__('Cancelled merchants')}" data-area='["90%","85%"]'><i class="fa fa-ban"></i> {:__('Cancelled merchants')}</a>
                         {/if}
                     </div>
                     <table id="table" class="table table-striped table-bordered table-hover table-nowrap"

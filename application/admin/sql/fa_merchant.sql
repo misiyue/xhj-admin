@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS `fa_merchant` (
   `backimage` varchar(255) DEFAULT NULL COMMENT '证件背面',
   `surety` decimal(12,4) NOT NULL DEFAULT '0.0000' COMMENT '保证金',
   `surety_bill_id` int(11) NOT NULL DEFAULT '0' COMMENT '保证金冻结账单id，驳回解冻后归零',
-  `status` tinyint(1) NOT NULL DEFAULT '0' COMMENT '审核状态 0待审核 1审核通过 2驳回',
+  `status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '审核状态: 0-待审核，1-审核通过，2-驳回，-1-申请注销，-2-注销',
   `reason` varchar(255) DEFAULT NULL COMMENT '驳回原因',
   `is_limit` tinyint(1) NOT NULL DEFAULT '0' COMMENT '是否被限制',
   `limit_time` int(11) NOT NULL DEFAULT '0' COMMENT '限制截止时间',
@@ -28,4 +28,4 @@ CREATE TABLE IF NOT EXISTS `fa_merchant` (
 
 -- 若表已存在：ALTER TABLE `merchant` ADD COLUMN `pay_types` varchar(255) DEFAULT NULL COMMENT '开通支付类型json示例{"hd":merchant_payment.id,"hm":merchant_payment.id}' AFTER `is_close`;
 
--- 菜单：merchant/merchant，子节点 index、edit、auditlist、audit
+-- 菜单：merchant/merchant，子节点 index、edit、auditlist、audit、cancelauditlist、cancelaudit、cancelledlist

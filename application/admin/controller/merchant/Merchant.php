@@ -59,7 +59,7 @@ class Merchant extends Backend
     }
 
     /**
-     * 待审核商户列表（弹窗）
+     * 待审核商户列表（弹窗）- 入驻审核
      */
     public function auditlist()
     {
@@ -118,23 +118,7 @@ class Merchant extends Backend
                 if ($reason === '') {
                     $this->error(__('Reject reason required'));
                 }
-                $surety = (float)$row['surety'];
-                $suretyBillId = (int)($row['surety_bill_id'] ?? 0);
-                if ($surety > 0 || $suretyBillId > 0) {
-                    $user = Users::get($row['user_id']);
-                    if (!$user || trim((string)$user['uuid']) === '') {
-                        $this->error(__('User uuid not found'));
-                    }
-                    $unfreeze = WalletApi::unfreezenAccount(
-                        (int)$row['user_id'],
-                        (string)$user['uuid'],
-                        rtrim(rtrim(sprintf('%.4f', $surety), '0'), '.') ?: '0',
-                        1
-                    );
-                    if (!$unfreeze['success']) {
-                        $this->error($unfreeze['message'] ?: __('Wallet api unfreeze failed'));
-                    }
-                }
+                $this->unfreezeSuretyOrFail($row);
                 $updated = $this->model->where('id', $row['id'])->where('status', 0)->update([
                     'status'         => 2,
                     'reason'         => $reason,
@@ -148,6 +132,144 @@ class Merchant extends Backend
             $this->error(__('Invalid parameters'));
         }
 
+        $this->view->assign('row', $this->buildAuditViewData($row));
+        return $this->view->fetch();
+    }
+
+    /**
+     * 注销待审核列表（弹窗）
+     */
+    public function cancelauditlist()
+    {
+        $this->request->filter(['strip_tags', 'trim']);
+        if ($this->request->isAjax()) {
+            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            $list = $this->model
+                ->where($where)
+                ->where('status', -1)
+                ->order($sort, $order)
+                ->paginate($limit);
+            $result = ['total' => $list->total(), 'rows' => $list->items()];
+
+            return json($result);
+        }
+        return $this->view->fetch();
+    }
+
+    /**
+     * 注销审核（申请注销商户）
+     *
+     * @param string|null $ids
+     * @return mixed
+     */
+    public function cancelaudit($ids = null)
+    {
+        $ids = $ids !== null && $ids !== '' ? $ids : $this->request->param('ids');
+        $row = $this->model->get($ids);
+        if (!$row) {
+            $this->error(__('No Results were found'));
+        }
+        if ((int)$row['status'] !== -1) {
+            $this->error(__('Only cancel pending merchant can be audited'));
+        }
+
+        if ($this->request->isPost()) {
+            $this->token();
+            $postIds = $this->request->post('ids', $ids);
+            if ((string)$postIds !== (string)$row['id']) {
+                $this->error(__('Invalid parameters'));
+            }
+            $action = $this->request->post('audit_action', '');
+            $reason = trim((string)$this->request->post('reason', ''));
+
+            if ($action === 'approve') {
+                $this->unfreezeSuretyOrFail($row);
+                $updated = $this->model->where('id', $row['id'])->where('status', -1)->update([
+                    'status'         => -2,
+                    'reason'         => '',
+                    'surety_bill_id' => 0,
+                ]);
+                if (!$updated) {
+                    $this->error(__('Already audited or status changed'));
+                }
+                $this->success(__('Cancel approved'));
+            }
+            if ($action === 'reject') {
+                if ($reason === '') {
+                    $this->error(__('Reject reason required'));
+                }
+                $updated = $this->model->where('id', $row['id'])->where('status', -1)->update([
+                    'status' => 1,
+                    'reason' => $reason,
+                ]);
+                if (!$updated) {
+                    $this->error(__('Already audited or status changed'));
+                }
+                $this->success(__('Cancel rejected'));
+            }
+            $this->error(__('Invalid parameters'));
+        }
+
+        $this->view->assign('row', $this->buildAuditViewData($row));
+        return $this->view->fetch('cancelaudit');
+    }
+
+    /**
+     * 已注销商户列表（弹窗）
+     */
+    public function cancelledlist()
+    {
+        $this->request->filter(['strip_tags', 'trim']);
+        if ($this->request->isAjax()) {
+            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            $list = $this->model
+                ->where($where)
+                ->where('status', -2)
+                ->order($sort, $order)
+                ->paginate($limit);
+            $result = ['total' => $list->total(), 'rows' => $list->items()];
+
+            return json($result);
+        }
+        return $this->view->fetch();
+    }
+
+    /**
+     * 解冻商户保证金，失败则中断
+     *
+     * @param array|\think\Model $row
+     */
+    protected function unfreezeSuretyOrFail($row)
+    {
+        $row = $row instanceof \think\Model ? $row->toArray() : (array)$row;
+        $surety = (float)($row['surety'] ?? 0);
+        $suretyBillId = (int)($row['surety_bill_id'] ?? 0);
+        if ($surety <= 0 && $suretyBillId <= 0) {
+            return;
+        }
+        $user = Users::get($row['user_id']);
+        if (!$user || trim((string)$user['uuid']) === '') {
+            $this->error(__('User uuid not found'));
+        }
+        $unfreeze = WalletApi::unfreezenAccount(
+            (int)$row['user_id'],
+            (string)$user['uuid'],
+            rtrim(rtrim(sprintf('%.4f', $surety), '0'), '.') ?: '0',
+            1
+        );
+        if (!$unfreeze['success']) {
+            $this->error($unfreeze['message'] ?: __('Wallet api unfreeze failed'));
+        }
+    }
+
+    /**
+     * 审核页展示数据
+     *
+     * @param \think\Model $row
+     * @return array
+     */
+    protected function buildAuditViewData($row)
+    {
         $idTypeList = [
             1 => __('Id card'),
             2 => __('Passport'),
@@ -158,8 +280,7 @@ class Merchant extends Backend
         $data['image_url'] = $row['image'] ? cdnurl($row['image'], true) : '';
         $data['backimage_url'] = $row['backimage'] ? cdnurl($row['backimage'], true) : '';
 
-        $this->view->assign('row', $data);
-        return $this->view->fetch();
+        return $data;
     }
 
     /**
