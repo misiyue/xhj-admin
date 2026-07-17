@@ -173,11 +173,58 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             });
         },
         cancelauditlist: function () {
-            Controller.api.initAuditTable({
-                index_url: 'merchant/merchant/cancelauditlist',
-                audit_url: 'merchant/merchant/cancelaudit',
-                audit_title: __('Cancel audit action')
+            Table.api.init({
+                extend: {
+                    index_url: 'merchant/merchant/cancelauditlist',
+                    audit_url: 'merchant/merchant/cancelaudit',
+                    table: 'merchant',
+                }
             });
+
+            var table = $("#table");
+
+            table.bootstrapTable({
+                url: $.fn.bootstrapTable.defaults.extend.index_url,
+                pk: 'id',
+                sortName: 'cancel_apply_at',
+                sortOrder: 'desc',
+                columns: [
+                    [
+                        {field: 'id', title: __('Id'), sortable: true},
+                        {field: 'nickname', title: __('Merchant name'), operate: 'LIKE'},
+                        {field: 'user_id', title: __('User_id'), operate: '='},
+                        {field: 'realname', title: __('Realname'), operate: 'LIKE'},
+                        {
+                            field: 'cancel_apply_at',
+                            title: __('Cancel apply time'),
+                            operate: 'RANGE',
+                            addclass: 'datetimerange',
+                            formatter: Table.api.formatter.datetime,
+                            sortable: true,
+                            width: 160
+                        },
+                        {
+                            field: 'operate',
+                            title: __('Operate'),
+                            table: table,
+                            events: Table.api.events.operate,
+                            buttons: [
+                                {
+                                    name: 'audit',
+                                    text: __('Audit'),
+                                    title: __('Cancel audit action'),
+                                    classname: 'btn btn-xs btn-success btn-dialog',
+                                    icon: 'fa fa-gavel',
+                                    url: 'merchant/merchant/cancelaudit'
+                                }
+                            ],
+                            formatter: Table.api.formatter.operate
+                        }
+                    ]
+                ]
+            });
+
+            Table.api.bindevent(table);
         },
         cancelledlist: function () {
             Table.api.init({
@@ -192,7 +239,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             table.bootstrapTable({
                 url: $.fn.bootstrapTable.defaults.extend.index_url,
                 pk: 'id',
-                sortName: 'updated_at',
+                sortName: 'cancel_at',
                 sortOrder: 'desc',
                 columns: [
                     [
@@ -210,7 +257,16 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             }
                         },
                         {
-                            field: 'updated_at',
+                            field: 'cancel_apply_at',
+                            title: __('Cancel apply time'),
+                            operate: 'RANGE',
+                            addclass: 'datetimerange',
+                            formatter: Table.api.formatter.datetime,
+                            sortable: true,
+                            width: 160
+                        },
+                        {
+                            field: 'cancel_at',
                             title: __('Cancel time'),
                             operate: 'RANGE',
                             addclass: 'datetimerange',
