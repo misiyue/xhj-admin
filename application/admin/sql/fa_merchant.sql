@@ -21,11 +21,14 @@ CREATE TABLE IF NOT EXISTS `fa_merchant` (
   `frozen_time` int(11) NOT NULL DEFAULT '0' COMMENT '封禁截止时间',
   `is_close` tinyint(1) NOT NULL DEFAULT '0' COMMENT '是否被关停',
   `pay_types` varchar(255) DEFAULT NULL COMMENT '开通支付类型json示例{"hd":merchant_payment.id,"hm":merchant_payment.id}：hd-宏达，hm-汇美',
+  `cancel_apply_at` datetime DEFAULT NULL COMMENT '注销申请时间',
+  `cancel_at` datetime DEFAULT NULL COMMENT '注销时间',
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='商户';
 
 -- 若表已存在：ALTER TABLE `merchant` ADD COLUMN `pay_types` varchar(255) DEFAULT NULL COMMENT '开通支付类型json示例{"hd":merchant_payment.id,"hm":merchant_payment.id}' AFTER `is_close`;
+-- ALTER TABLE `merchant` ADD COLUMN `cancel_apply_at` datetime NULL COMMENT '注销申请时间' AFTER `pay_types`, ADD COLUMN `cancel_at` datetime NULL COMMENT '注销时间' AFTER `cancel_apply_at`;
 
 -- 菜单：merchant/merchant，子节点 index、edit、auditlist、audit、cancelauditlist、cancelaudit、cancelledlist

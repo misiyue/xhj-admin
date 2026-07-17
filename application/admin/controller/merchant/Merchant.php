@@ -188,6 +188,7 @@ class Merchant extends Backend
                     'status'         => -2,
                     'reason'         => '',
                     'surety_bill_id' => 0,
+                    'cancel_at'      => date('Y-m-d H:i:s'),
                 ]);
                 if (!$updated) {
                     $this->error(__('Already audited or status changed'));

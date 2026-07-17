@@ -18,6 +18,7 @@ return [
     'Cancel audit'    => '注销审核',
     'Cancel audit action' => '注销审核',
     'Cancelled merchants' => '注销商户',
+    'Cancel apply time' => '注销申请时间',
     'Cancel time'     => '注销时间',
     'Operate'         => '操作',
     'Only pending merchant can be audited' => '仅待审核状态的商户可审核',
