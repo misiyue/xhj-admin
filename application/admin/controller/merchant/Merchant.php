@@ -187,6 +187,7 @@ class Merchant extends Backend
                 $updated = $this->model->where('id', $row['id'])->where('status', -1)->update([
                     'status'         => -2,
                     'reason'         => '',
+                    'car_reason'     => '',
                     'surety_bill_id' => 0,
                     'cancel_at'      => date('Y-m-d H:i:s'),
                 ]);
@@ -200,8 +201,8 @@ class Merchant extends Backend
                     $this->error(__('Reject reason required'));
                 }
                 $updated = $this->model->where('id', $row['id'])->where('status', -1)->update([
-                    'status' => 1,
-                    'reason' => $reason,
+                    'status'     => 1,
+                    'car_reason' => $reason,
                 ]);
                 if (!$updated) {
                     $this->error(__('Already audited or status changed'));
