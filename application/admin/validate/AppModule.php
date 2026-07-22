@@ -4,7 +4,7 @@ namespace app\admin\validate;
 
 use think\Validate;
 
-class AppFunction extends Validate
+class AppModule extends Validate
 {
     protected $rule = [
         'code'    => 'require|max:255',

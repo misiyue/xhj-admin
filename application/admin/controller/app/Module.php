@@ -2,20 +2,18 @@
 
 namespace app\admin\controller\app;
 
-use app\admin\model\AppFunction as AppFunctionModel;
+use app\admin\model\AppModule as AppModuleModel;
 use app\common\controller\Backend;
 
 /**
- * App 功能管理
- *
- * 菜单规则：app/appfunction（function 为 PHP 保留字，不可作控制器类名）
+ * App 模块管理
  *
  * @icon fa fa-toggle-on
  */
-class Appfunction extends Backend
+class Module extends Backend
 {
     /**
-     * @var AppFunctionModel
+     * @var AppModuleModel
      */
     protected $model = null;
 
@@ -30,8 +28,8 @@ class Appfunction extends Backend
     public function _initialize()
     {
         parent::_initialize();
-        $this->model = new AppFunctionModel;
-        $isOpenList = AppFunctionModel::getIsOpenList();
+        $this->model = new AppModuleModel;
+        $isOpenList = AppModuleModel::getIsOpenList();
         $this->view->assign('isOpenList', $isOpenList);
         $this->assignconfig('isOpenList', $isOpenList);
     }

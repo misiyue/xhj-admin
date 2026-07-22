@@ -1,5 +1,5 @@
--- App 功能开关表（物理表名：fa_app_function，与模型 $name = 'app_function' 对应）
-CREATE TABLE IF NOT EXISTS `fa_app_function` (
+-- App 模块开关表（物理表名：fa_app_module，与模型 $name = 'app_module' 对应）
+CREATE TABLE IF NOT EXISTS `fa_app_module` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `code` varchar(255) DEFAULT NULL COMMENT '代号',
   `title` varchar(255) DEFAULT NULL COMMENT '标题',
@@ -7,8 +7,7 @@ CREATE TABLE IF NOT EXISTS `fa_app_function` (
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='App功能开关';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='App模块开关';
 
--- 菜单规则（因 function 为 PHP 保留字，控制器类名使用 Appfunction）：
--- app/appfunction
+-- 菜单规则：app/module
 -- 子节点：index、add、edit、del、multi

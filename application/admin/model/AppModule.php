@@ -5,11 +5,11 @@ namespace app\admin\model;
 use think\Model;
 
 /**
- * App 功能开关
+ * App 模块开关
  */
-class AppFunction extends Model
+class AppModule extends Model
 {
-    protected $name = 'app_function';
+    protected $name = 'app_module';
 
     protected $autoWriteTimestamp = false;
 

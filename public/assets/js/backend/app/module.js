@@ -4,12 +4,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
         index: function () {
             Table.api.init({
                 extend: {
-                    index_url: 'app/appfunction/index',
-                    add_url: 'app/appfunction/add',
-                    edit_url: 'app/appfunction/edit',
-                    del_url: 'app/appfunction/del',
-                    multi_url: 'app/appfunction/multi',
-                    table: 'app_function',
+                    index_url: 'app/module/index',
+                    add_url: 'app/module/add',
+                    edit_url: 'app/module/edit',
+                    del_url: 'app/module/del',
+                    multi_url: 'app/module/multi',
+                    table: 'app_module',
                 }
             });
 
