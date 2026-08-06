@@ -12,7 +12,7 @@ return [
     'Position index top'  => '首页顶部',
     'Position index mid'  => '首页中部',
     'Position index banner' => '首页轮播',
-    'Position tab'        => '选项',
+    'Position tab'        => '导航',
     'Position game'       => '小游戏',
     'Position none'       => '未选择',
     'Position invalid'    => '位置须为 indexTop、indexTMid、idxBanner、tab、game 之一，或留空',
