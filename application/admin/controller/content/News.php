@@ -44,20 +44,18 @@ class News extends Backend
         $this->assignconfig('newsTypeList', $newsTypeList);
         $this->assignconfig('sourceList', $sourceList);
         $this->assignconfig('statusList', $statusList);
-
-        if (empty($this->view->config['simditor'])) {
-            $this->assignconfig('simditor', [
-                'classname'          => '.editor',
-                'height'             => '300',
-                'minHeight'          => 250,
-                'toolbarFloat'       => 0,
-                'toolbar'            => ['title', 'bold', 'italic', 'underline', 'strikethrough', 'fontScale', 'color', '|', 'ol', 'ul', 'blockquote', 'code', 'table', '|', 'link', 'image', 'hr', '|', 'indent', 'outdent', 'alignment'],
-                'mobileToolbar'      => ['bold', 'underline', 'strikethrough', 'color', 'ul', 'ol'],
-                'placeholder'        => '',
-                'isdompurify'        => 0,
-                'allowiframeprefixs' => [],
-            ]);
-        }
+        // 确保富文本编辑器配置存在（插件未注入时兜底）
+        $this->assignconfig('simditor', [
+            'classname'          => '.editor',
+            'height'             => '300',
+            'minHeight'          => 250,
+            'toolbarFloat'       => 0,
+            'toolbar'            => ['title', 'bold', 'italic', 'underline', 'strikethrough', 'fontScale', 'color', '|', 'ol', 'ul', 'blockquote', 'code', 'table', '|', 'link', 'image', 'hr', '|', 'indent', 'outdent', 'alignment'],
+            'mobileToolbar'      => ['bold', 'underline', 'strikethrough', 'color', 'ul', 'ol'],
+            'placeholder'        => '',
+            'isdompurify'        => 0,
+            'allowiframeprefixs' => [],
+        ]);
     }
 
     public function add()
