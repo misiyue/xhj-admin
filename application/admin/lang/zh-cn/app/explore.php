@@ -13,8 +13,9 @@ return [
     'Position index mid'  => '首页中部',
     'Position index banner' => '首页轮播',
     'Position tab'        => '选项',
+    'Position game'       => '小游戏',
     'Position none'       => '未选择',
-    'Position invalid'    => '位置须为 indexTop、indexTMid、idxBanner、tab 之一，或留空',
+    'Position invalid'    => '位置须为 indexTop、indexTMid、idxBanner、tab、game 之一，或留空',
     'Explore open yes' => '是',
     'Explore open no'  => '否',
 ];
