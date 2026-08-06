@@ -1,0 +1,27 @@
+<?php
+
+return [
+    'Title'                      => '标题',
+    'Collect_type'               => '采集类型',
+    'Collect type image_text'    => '图文',
+    'Collect type video'         => '视频',
+    'News_type'                  => '资讯类型',
+    'News type global_hot'       => '火箭全球热讯',
+    'News type crypto'           => '加密货币',
+    'News type realtime_hot'     => '实时热门',
+    'Source'                     => '来源',
+    'Source youtube'             => 'YouTube',
+    'Source twitter'             => '推特',
+    'Source nytimes'             => '纽约时报',
+    'Source telegram'            => 'TG订阅号',
+    'Content'                    => '正文内容',
+    'Cover'                      => '封面图',
+    'Cover tips'                 => '支持本地上传，或直接粘贴网络图片链接',
+    'Source_url'                 => '原文链接',
+    'Upload_time'                => '上传/采集时间',
+    'Publish_time'               => '发布时间',
+    'Status'                     => '状态',
+    'Status draft'               => '草稿',
+    'Status published'           => '已发布',
+    'Status offline'             => '已下架',
+];
