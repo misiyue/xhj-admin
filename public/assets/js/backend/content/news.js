@@ -1,4 +1,4 @@
-define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'addons'], function ($, undefined, Backend, Table, Form) {
+define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'upload'], function ($, undefined, Backend, Table, Form, Upload) {
 
     var Controller = {
         index: function () {
@@ -124,14 +124,84 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'addons'], function (
             Controller.api.bindevent();
         },
         api: {
-            syncEditor: function (form) {
-                if (!window.Simditor || !Simditor.list) {
+            editors: {},
+            initEditor: function (form) {
+                var $editors = $('.editor', form);
+                if (!$editors.length) {
                     return;
                 }
+                require(['css!../addons/simditor/css/simditor.min.css', 'simditor'], function (Simditor) {
+                    if (!window.Simditor) {
+                        window.Simditor = Simditor;
+                    }
+                    $editors.each(function () {
+                        var $textarea = $(this);
+                        var id = $textarea.attr('id') || ('editor-' + Math.random().toString(36).slice(2));
+                        $textarea.attr('id', id);
+                        if (Controller.api.editors[id]) {
+                            return;
+                        }
+                        var editor = new Simditor({
+                            textarea: this,
+                            height: 300,
+                            minHeight: 250,
+                            toolbar: ['title', 'bold', 'italic', 'underline', 'strikethrough', 'fontScale', 'color', '|', 'ol', 'ul', 'blockquote', 'code', 'table', '|', 'link', 'image', 'hr', '|', 'indent', 'outdent', 'alignment'],
+                            mobileToolbar: ['bold', 'underline', 'strikethrough', 'color', 'ul', 'ol'],
+                            toolbarFloat: false,
+                            placeholder: '',
+                            pasteImage: true,
+                            defaultImage: (Config.__CDN__ || '') + '/assets/addons/simditor/images/image.png',
+                            upload: {url: '/'}
+                        });
+
+                        var $selectImage = editor.toolbar.wrapper.find('.menu-item-select-image');
+                        if ($selectImage.length) {
+                            $selectImage.on('click', function () {
+                                parent.Fast.api.open('general/attachment/select?element_id=&multiple=true&mimetype=image/', __('Choose'), {
+                                    callback: function (data) {
+                                        $.each((data.url || '').split(/,/), function () {
+                                            if (!this) {
+                                                return;
+                                            }
+                                            editor.insertHTML('<img src="' + Fast.api.cdnurl(this, true) + '" />');
+                                        });
+                                    }
+                                });
+                                return false;
+                            });
+                        }
+
+                        editor.uploader.on('beforeupload', function (e, file) {
+                            Upload.api.send(file.obj, function (data) {
+                                editor.uploader.trigger('uploadsuccess', [file, {
+                                    success: true,
+                                    file_path: Fast.api.cdnurl(data.url, true)
+                                }]);
+                            });
+                            return false;
+                        });
+
+                        var syncValue = function () {
+                            $textarea.val(editor.getValue());
+                        };
+                        editor.on('blur', function () {
+                            syncValue();
+                            $textarea.trigger('blur');
+                        });
+                        editor.on('valuechanged', syncValue);
+                        editor.body.css({height: 300, 'min-height': 250, 'overflow-y': 'auto'});
+                        Controller.api.editors[id] = editor;
+                    });
+                }, function (err) {
+                    console.error('Simditor load failed', err);
+                    Toastr.error('富文本编辑器加载失败，请刷新页面重试');
+                });
+            },
+            syncEditor: function (form) {
                 $(".editor", form).each(function () {
                     var id = $(this).attr('id');
-                    if (id && Simditor.list[id]) {
-                        $(this).val(Simditor.list[id].getValue());
+                    if (id && Controller.api.editors[id]) {
+                        $(this).val(Controller.api.editors[id].getValue());
                     }
                 });
             },
@@ -144,6 +214,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'addons'], function (
                     Controller.api.syncEditor(form);
                     return true;
                 });
+                Controller.api.initEditor(form);
                 $(document).off('click.newsSimditor', '.layui-layer-footer .btn-primary').on('click.newsSimditor', '.layui-layer-footer .btn-primary', function () {
                     Controller.api.syncEditor(form);
                 });

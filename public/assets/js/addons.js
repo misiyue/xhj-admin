@@ -1,19 +1,19 @@
-define(['form', 'upload'], function (Form, Upload) {
+define([], function () {
     require.config({
-        paths: {
-            'simditor': '../addons/simditor/js/simditor',
-            'simple-module': '../addons/simditor/js/module',
-            'simple-hotkeys': '../addons/simditor/js/hotkeys',
-            'simple-uploader': '../addons/simditor/js/uploader',
-            'dompurify': '../addons/simditor/js/dompurify',
-        },
-        shim: {
-            'simditor': [
-                'css!../addons/simditor/css/simditor.min.css',
-            ]
-        }
-    });
-
+    paths: {
+        'simditor': '../addons/simditor/js/simditor',
+        'simple-module': '../addons/simditor/js/module',
+        'simple-hotkeys': '../addons/simditor/js/hotkeys',
+        'simple-uploader': '../addons/simditor/js/uploader',
+        'dompurify': '../addons/simditor/js/dompurify',
+    },
+    shim: {
+        'simditor': [
+            'css!../addons/simditor/css/simditor.min.css',
+        ]
+    }
+});
+require(['form', 'upload'], function (Form, Upload) {
     var defaultToolbar = ['title', 'bold', 'italic', 'underline', 'strikethrough', 'fontScale', 'color', '|', 'ol', 'ul', 'blockquote', 'code', 'table', '|', 'link', 'image', 'hr', '|', 'indent', 'outdent', 'alignment'];
     var defaultMobileToolbar = ['bold', 'underline', 'strikethrough', 'color', 'ul', 'ol'];
 
@@ -31,7 +31,9 @@ define(['form', 'upload'], function (Form, Upload) {
         }, typeof Config !== 'undefined' && Config.simditor ? Config.simditor : {});
     };
 
-    var initSimditor = function (form) {
+    var _bindevent = Form.events.bindevent;
+    Form.events.bindevent = function (form) {
+        _bindevent.apply(this, [form]);
         var cfg = getSimditorConfig();
         if ($(cfg.classname || '.editor', form).length === 0) {
             return;
@@ -73,7 +75,6 @@ define(['form', 'upload'], function (Form, Upload) {
                 if (Simditor.list[id]) {
                     return;
                 }
-
                 var editor = new Simditor({
                     textarea: this,
                     height: isNaN(parseInt(cfg.height, 10)) ? null : parseInt(cfg.height, 10),
@@ -90,11 +91,10 @@ define(['form', 'upload'], function (Form, Upload) {
                     defaultImage: (Config.__CDN__ || '') + '/assets/addons/simditor/images/image.png',
                     upload: {url: '/'}
                 });
-
                 var $selectImage = editor.toolbar.wrapper.find('.menu-item-select-image');
                 if ($selectImage.length) {
                     $selectImage.on('click', function () {
-                        var selectUrl = Config.modulename === 'index' ? 'user/attachment' : 'general/attachment/select';
+                        var selectUrl = typeof Config !== 'undefined' && Config.modulename === 'index' ? 'user/attachment' : 'general/attachment/select';
                         parent.Fast.api.open(selectUrl + '?element_id=&multiple=true&mimetype=image/', __('Choose'), {
                             callback: function (data) {
                                 $.each((data.url || '').split(/,/), function () {
@@ -108,7 +108,6 @@ define(['form', 'upload'], function (Form, Upload) {
                         return false;
                     });
                 }
-
                 editor.uploader.on('beforeupload', function (e, file) {
                     Upload.api.send(file.obj, function (data) {
                         editor.uploader.trigger('uploadsuccess', [file, {
@@ -118,7 +117,6 @@ define(['form', 'upload'], function (Form, Upload) {
                     });
                     return false;
                 });
-
                 var syncValue = function () {
                     $textarea.val(editor.getValue());
                 };
@@ -127,7 +125,6 @@ define(['form', 'upload'], function (Form, Upload) {
                     $textarea.trigger('blur');
                 });
                 editor.on('valuechanged', syncValue);
-
                 if (editor.opts.height) {
                     editor.body.css({height: editor.opts.height, 'overflow-y': 'auto'});
                 }
@@ -138,12 +135,6 @@ define(['form', 'upload'], function (Form, Upload) {
             });
         });
     };
+});
 
-    var _bindevent = Form.events.bindevent;
-    Form.events.bindevent = function (form) {
-        _bindevent.apply(this, arguments);
-        initSimditor(form);
-    };
-
-    return {init: initSimditor};
 });
