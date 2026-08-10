@@ -10,7 +10,7 @@ return [
     'Content editor tips'=> '图文类型使用富文本编辑',
     'Content video tips' => '视频类型请填写视频地址或嵌入链接',
     'Cover'              => '封面图',
-    'Cover tips'         => '支持本地上传，或直接粘贴网络图片链接',
+    'Cover tips'         => '支持本地上传或粘贴图片链接；视频类型未上传封面时将自动截取视频第一帧',
     'Source_url'         => '原文链接',
     'Upload_time'        => '上传/采集时间',
     'Publish_time'       => '发布时间',

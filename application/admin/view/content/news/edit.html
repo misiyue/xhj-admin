@@ -63,6 +63,9 @@
         <label for="c-content-video" class="control-label col-xs-12 col-sm-2">{:__('Content')}:</label>
         <div class="col-xs-12 col-sm-8">
             <input id="c-content-video" class="form-control" type="text" value="{$row.content|default=''|htmlentities}" maxlength="2000" placeholder="https://"{if isset($row.type_id) && $row.type_id == 2} name="row[content]"{/if}>
+            <div id="video-preview-wrap" class="video-preview-wrap" style="display:none;margin-top:10px;">
+                <video id="c-content-video-preview" class="video-preview" controls preload="metadata" playsinline style="max-width:100%;max-height:360px;background:#000;"></video>
+            </div>
             <span class="help-block">{:__('Content video tips')}</span>
         </div>
     </div>

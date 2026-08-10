@@ -2,6 +2,7 @@
 
 namespace app\admin\model;
 
+use app\common\library\VideoCover;
 use think\Model;
 
 /**
@@ -12,6 +13,27 @@ class AppNews extends Model
     protected $name = 'app_news';
 
     protected $autoWriteTimestamp = false;
+
+    protected static function init()
+    {
+        $fillCover = function ($row) {
+            $typeId = isset($row['type_id']) ? (int)$row['type_id'] : 0;
+            $cover = isset($row['cover']) ? trim((string)$row['cover']) : '';
+            if ($typeId !== 2 || $cover !== '') {
+                return;
+            }
+            $content = isset($row['content']) ? trim((string)$row['content']) : '';
+            if ($content === '') {
+                return;
+            }
+            $url = VideoCover::capture($content);
+            if ($url !== '') {
+                $row['cover'] = $url;
+            }
+        };
+        self::beforeInsert($fillCover);
+        self::beforeUpdate($fillCover);
+    }
 
     public static function getTypeList()
     {
