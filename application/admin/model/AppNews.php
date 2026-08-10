@@ -13,30 +13,11 @@ class AppNews extends Model
 
     protected $autoWriteTimestamp = false;
 
-    public static function getCollectTypeList()
+    public static function getTypeList()
     {
         return [
-            'image_text' => __('Collect type image_text'),
-            'video'      => __('Collect type video'),
-        ];
-    }
-
-    public static function getNewsTypeList()
-    {
-        return [
-            'global_hot'   => __('News type global_hot'),
-            'crypto'       => __('News type crypto'),
-            'realtime_hot' => __('News type realtime_hot'),
-        ];
-    }
-
-    public static function getSourceList()
-    {
-        return [
-            'youtube'  => __('Source youtube'),
-            'twitter'  => __('Source twitter'),
-            'nytimes'  => __('Source nytimes'),
-            'telegram' => __('Source telegram'),
+            1 => __('Type image_text'),
+            2 => __('Type video'),
         ];
     }
 
@@ -46,6 +27,14 @@ class AppNews extends Model
             0  => __('Status draft'),
             1  => __('Status published'),
             -1 => __('Status offline'),
+        ];
+    }
+
+    public static function getIsIndexList()
+    {
+        return [
+            1 => __('Yes'),
+            0 => __('No'),
         ];
     }
 
@@ -67,5 +56,23 @@ class AppNews extends Model
     public function setSourceUrlAttr($value)
     {
         return $value === '' ? null : $value;
+    }
+
+    public function setCategoryIdAttr($value)
+    {
+        return (int)$value;
+    }
+
+    public function setTypeIdAttr($value)
+    {
+        if ($value === '' || $value === null) {
+            return null;
+        }
+        return (int)$value;
+    }
+
+    public function setIsIndexAttr($value)
+    {
+        return (int)$value ? 1 : 0;
     }
 }

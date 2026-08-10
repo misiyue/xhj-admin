@@ -7,17 +7,17 @@ use think\Validate;
 class AppNews extends Validate
 {
     protected $rule = [
-        'title'        => 'require|max:255',
-        'collect_type' => 'require|in:image_text,video',
-        'news_type'    => 'require|in:global_hot,crypto,realtime_hot',
-        'source'       => 'require|in:youtube,twitter,nytimes,telegram',
-        'cover'        => 'max:255',
-        'source_url'   => 'max:512',
-        'status'       => 'require|in:0,1,-1',
+        'title'       => 'require|max:255',
+        'category_id' => 'require|integer|gt:0',
+        'type_id'     => 'require|in:1,2',
+        'cover'       => 'max:255',
+        'source_url'  => 'max:512',
+        'status'      => 'require|in:0,1,-1',
+        'is_index'    => 'require|in:0,1',
     ];
 
     protected $scene = [
-        'add'  => ['title', 'collect_type', 'news_type', 'source', 'cover', 'source_url', 'status'],
-        'edit' => ['title', 'collect_type', 'news_type', 'source', 'cover', 'source_url', 'status'],
+        'add'  => ['title', 'category_id', 'type_id', 'cover', 'source_url', 'status', 'is_index'],
+        'edit' => ['title', 'category_id', 'type_id', 'cover', 'source_url', 'status', 'is_index'],
     ];
 }
