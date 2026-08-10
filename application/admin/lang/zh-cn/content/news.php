@@ -18,7 +18,4 @@ return [
     'Status draft'       => '草稿',
     'Status published'   => '已发布',
     'Status offline'     => '已下架',
-    'Is_index'           => '是否首页',
-    'Yes'                => '是',
-    'No'                 => '否',
 ];

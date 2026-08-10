@@ -30,14 +30,6 @@ class AppNews extends Model
         ];
     }
 
-    public static function getIsIndexList()
-    {
-        return [
-            1 => __('Yes'),
-            0 => __('No'),
-        ];
-    }
-
     public function setUploadTimeAttr($value)
     {
         return $value === '' || $value === null ? null : $value;
@@ -69,10 +61,5 @@ class AppNews extends Model
             return null;
         }
         return (int)$value;
-    }
-
-    public function setIsIndexAttr($value)
-    {
-        return (int)$value ? 1 : 0;
     }
 }

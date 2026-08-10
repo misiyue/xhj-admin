@@ -62,16 +62,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'upload'], function (
                             operate: '='
                         },
                         {
-                            field: 'is_index',
-                            title: __('Is_index'),
-                            searchList: Config.isIndexList,
-                            formatter: Table.api.formatter.toggle,
-                            yes: 1,
-                            no: 0,
-                            table: table,
-                            operate: '='
-                        },
-                        {
                             field: 'upload_time',
                             title: __('Upload_time'),
                             operate: 'RANGE',

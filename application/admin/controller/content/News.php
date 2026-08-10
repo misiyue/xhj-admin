@@ -24,7 +24,7 @@ class News extends Backend
 
     protected $modelSceneValidate = true;
 
-    protected $multiFields = 'status,is_index';
+    protected $multiFields = 'status';
 
     public function _initialize()
     {
@@ -34,17 +34,14 @@ class News extends Backend
         $categoryList = AppNewsCategoryModel::getSelectList('news');
         $typeList = AppNewsModel::getTypeList();
         $statusList = AppNewsModel::getStatusList();
-        $isIndexList = AppNewsModel::getIsIndexList();
 
         $this->view->assign('categoryList', $categoryList);
         $this->view->assign('typeList', $typeList);
         $this->view->assign('statusList', $statusList);
-        $this->view->assign('isIndexList', $isIndexList);
 
         $this->assignconfig('categoryList', $categoryList);
         $this->assignconfig('typeList', $typeList);
         $this->assignconfig('statusList', $statusList);
-        $this->assignconfig('isIndexList', $isIndexList);
         $this->assignconfig('simditor', [
             'classname'          => '.editor',
             'height'             => '300',

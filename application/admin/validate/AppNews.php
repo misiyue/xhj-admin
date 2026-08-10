@@ -13,11 +13,10 @@ class AppNews extends Validate
         'cover'       => 'max:255',
         'source_url'  => 'max:512',
         'status'      => 'require|in:0,1,-1',
-        'is_index'    => 'require|in:0,1',
     ];
 
     protected $scene = [
-        'add'  => ['title', 'category_id', 'type_id', 'cover', 'source_url', 'status', 'is_index'],
-        'edit' => ['title', 'category_id', 'type_id', 'cover', 'source_url', 'status', 'is_index'],
+        'add'  => ['title', 'category_id', 'type_id', 'cover', 'source_url', 'status'],
+        'edit' => ['title', 'category_id', 'type_id', 'cover', 'source_url', 'status'],
     ];
 }

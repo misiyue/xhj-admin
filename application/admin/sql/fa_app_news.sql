@@ -10,7 +10,6 @@ CREATE TABLE IF NOT EXISTS `fa_app_news` (
   `upload_time` datetime DEFAULT NULL COMMENT '上传/采集时间',
   `publish_time` datetime DEFAULT NULL COMMENT '发布时间',
   `status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '状态：0-草稿，1-已发布，-1-已下架',
-  `is_index` tinyint(4) NOT NULL DEFAULT '0' COMMENT '是否首页：0-否，1-是',
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`),
