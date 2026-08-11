@@ -3,14 +3,14 @@ name: 自动部署
 on:
   push:
     branches:
-      - stage  # 当 stage 分支有 push 时触发
+      - stage
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    
+    environment: stage  # ⚠️ 添加这一行，指定环境名称
     steps:
-      - name: 在服务器${{ secrets.SERVER_HOST }}上拉取代码
+      - name: 在服务器上拉取代码
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.SERVER_HOST }}
@@ -18,5 +18,5 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd /www/wwwroot/xhj-admin
-            sudo -u www git reset --hard HEAD
+            sudo -u www git reset --hard HEAD~1
             sudo -u www git pull
