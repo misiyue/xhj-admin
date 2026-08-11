@@ -2,6 +2,7 @@
 
 namespace app\admin\model;
 
+use app\common\library\VideoCover;
 use think\Model;
 
 /**
@@ -13,30 +14,32 @@ class AppNews extends Model
 
     protected $autoWriteTimestamp = false;
 
-    public static function getCollectTypeList()
+    protected static function init()
     {
-        return [
-            'image_text' => __('Collect type image_text'),
-            'video'      => __('Collect type video'),
-        ];
+        $fillCover = function ($row) {
+            $typeId = isset($row['type_id']) ? (int)$row['type_id'] : 0;
+            $cover = isset($row['cover']) ? trim((string)$row['cover']) : '';
+            if ($typeId !== 2 || $cover !== '') {
+                return;
+            }
+            $content = isset($row['content']) ? trim((string)$row['content']) : '';
+            if ($content === '') {
+                return;
+            }
+            $url = VideoCover::capture($content);
+            if ($url !== '') {
+                $row['cover'] = $url;
+            }
+        };
+        self::beforeInsert($fillCover);
+        self::beforeUpdate($fillCover);
     }
 
-    public static function getNewsTypeList()
+    public static function getTypeList()
     {
         return [
-            'global_hot'   => __('News type global_hot'),
-            'crypto'       => __('News type crypto'),
-            'realtime_hot' => __('News type realtime_hot'),
-        ];
-    }
-
-    public static function getSourceList()
-    {
-        return [
-            'youtube'  => __('Source youtube'),
-            'twitter'  => __('Source twitter'),
-            'nytimes'  => __('Source nytimes'),
-            'telegram' => __('Source telegram'),
+            1 => __('Type image_text'),
+            2 => __('Type video'),
         ];
     }
 
@@ -67,5 +70,18 @@ class AppNews extends Model
     public function setSourceUrlAttr($value)
     {
         return $value === '' ? null : $value;
+    }
+
+    public function setCategoryIdAttr($value)
+    {
+        return (int)$value;
+    }
+
+    public function setTypeIdAttr($value)
+    {
+        if ($value === '' || $value === null) {
+            return null;
+        }
+        return (int)$value;
     }
 }

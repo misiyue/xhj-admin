@@ -7,21 +7,15 @@
         </div>
     </div>
     <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Collect_type')}:</label>
+        <label class="control-label col-xs-12 col-sm-2">{:__('Category_id')}:</label>
         <div class="col-xs-12 col-sm-8">
-            {:build_radios('row[collect_type]', $collectTypeList, 'image_text')}
+            {:build_select('row[category_id]', $categoryList, '', ['class'=>'form-control selectpicker', 'id'=>'c-category_id', 'data-rule'=>'required'])}
         </div>
     </div>
     <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('News_type')}:</label>
+        <label class="control-label col-xs-12 col-sm-2">{:__('Type_id')}:</label>
         <div class="col-xs-12 col-sm-8">
-            {:build_select('row[news_type]', $newsTypeList, 'global_hot', ['class'=>'form-control selectpicker', 'id'=>'c-news_type', 'data-rule'=>'required'])}
-        </div>
-    </div>
-    <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Source')}:</label>
-        <div class="col-xs-12 col-sm-8">
-            {:build_select('row[source]', $sourceList, 'youtube', ['class'=>'form-control selectpicker', 'id'=>'c-source', 'data-rule'=>'required'])}
+            {:build_radios('row[type_id]', $typeList, 1)}
         </div>
     </div>
     <div class="form-group">
@@ -57,10 +51,21 @@
             <input id="c-publish_time" class="form-control datetimepicker" data-date-format="YYYY-MM-DD HH:mm:ss" name="row[publish_time]" type="text" value="">
         </div>
     </div>
-    <div class="form-group">
+    <div class="form-group" id="content-editor-group">
         <label for="c-content" class="control-label col-xs-12 col-sm-2">{:__('Content')}:</label>
         <div class="col-xs-12 col-sm-8">
             <textarea id="c-content" class="form-control editor" name="row[content]" rows="10"></textarea>
+            <span class="help-block content-editor-tips">{:__('Content editor tips')}</span>
+        </div>
+    </div>
+    <div class="form-group" id="content-video-group" style="display:none;">
+        <label for="c-content-video" class="control-label col-xs-12 col-sm-2">{:__('Content')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-content-video" class="form-control" type="text" value="" maxlength="2000" placeholder="https://">
+            <div id="video-preview-wrap" class="video-preview-wrap" style="display:none;margin-top:10px;">
+                <video id="c-content-video-preview" class="video-preview" controls preload="metadata" playsinline style="max-width:100%;max-height:360px;background:#000;"></video>
+            </div>
+            <span class="help-block">{:__('Content video tips')}</span>
         </div>
     </div>
     <div class="form-group">

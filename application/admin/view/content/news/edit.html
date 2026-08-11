@@ -8,21 +8,15 @@
         </div>
     </div>
     <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Collect_type')}:</label>
+        <label class="control-label col-xs-12 col-sm-2">{:__('Category_id')}:</label>
         <div class="col-xs-12 col-sm-8">
-            {:build_radios('row[collect_type]', $collectTypeList, isset($row['collect_type']) ? $row['collect_type'] : 'image_text')}
+            {:build_select('row[category_id]', $categoryList, isset($row['category_id']) ? $row['category_id'] : '', ['class'=>'form-control selectpicker', 'id'=>'c-category_id', 'data-rule'=>'required'])}
         </div>
     </div>
     <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('News_type')}:</label>
+        <label class="control-label col-xs-12 col-sm-2">{:__('Type_id')}:</label>
         <div class="col-xs-12 col-sm-8">
-            {:build_select('row[news_type]', $newsTypeList, isset($row['news_type']) ? $row['news_type'] : 'global_hot', ['class'=>'form-control selectpicker', 'id'=>'c-news_type', 'data-rule'=>'required'])}
-        </div>
-    </div>
-    <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Source')}:</label>
-        <div class="col-xs-12 col-sm-8">
-            {:build_select('row[source]', $sourceList, isset($row['source']) ? $row['source'] : 'youtube', ['class'=>'form-control selectpicker', 'id'=>'c-source', 'data-rule'=>'required'])}
+            {:build_radios('row[type_id]', $typeList, isset($row['type_id']) ? $row['type_id'] : 1)}
         </div>
     </div>
     <div class="form-group">
@@ -58,10 +52,21 @@
             <input id="c-publish_time" class="form-control datetimepicker" data-date-format="YYYY-MM-DD HH:mm:ss" name="row[publish_time]" type="text" value="{$row.publish_time|default=''|htmlentities}">
         </div>
     </div>
-    <div class="form-group">
+    <div class="form-group" id="content-editor-group"{if isset($row.type_id) && $row.type_id == 2} style="display:none;"{/if}>
         <label for="c-content" class="control-label col-xs-12 col-sm-2">{:__('Content')}:</label>
         <div class="col-xs-12 col-sm-8">
-            <textarea id="c-content" class="form-control editor" name="row[content]" rows="10">{$row.content|default=''|htmlentities}</textarea>
+            <textarea id="c-content" class="form-control editor" name="row[content]" rows="10"{if isset($row.type_id) && $row.type_id == 2} disabled{/if}>{$row.content|default=''|htmlentities}</textarea>
+            <span class="help-block content-editor-tips">{:__('Content editor tips')}</span>
+        </div>
+    </div>
+    <div class="form-group" id="content-video-group"{if !isset($row.type_id) || $row.type_id != 2} style="display:none;"{/if}>
+        <label for="c-content-video" class="control-label col-xs-12 col-sm-2">{:__('Content')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-content-video" class="form-control" type="text" value="{$row.content|default=''|htmlentities}" maxlength="2000" placeholder="https://"{if isset($row.type_id) && $row.type_id == 2} name="row[content]"{/if}>
+            <div id="video-preview-wrap" class="video-preview-wrap" style="display:none;margin-top:10px;">
+                <video id="c-content-video-preview" class="video-preview" controls preload="metadata" playsinline style="max-width:100%;max-height:360px;background:#000;"></video>
+            </div>
+            <span class="help-block">{:__('Content video tips')}</span>
         </div>
     </div>
     <div class="form-group">

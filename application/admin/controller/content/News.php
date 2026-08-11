@@ -3,6 +3,7 @@
 namespace app\admin\controller\content;
 
 use app\admin\model\AppNews as AppNewsModel;
+use app\admin\model\AppNewsCategory as AppNewsCategoryModel;
 use app\common\controller\Backend;
 
 /**
@@ -30,21 +31,17 @@ class News extends Backend
         parent::_initialize();
         $this->model = new AppNewsModel;
 
-        $collectTypeList = AppNewsModel::getCollectTypeList();
-        $newsTypeList = AppNewsModel::getNewsTypeList();
-        $sourceList = AppNewsModel::getSourceList();
+        $categoryList = AppNewsCategoryModel::getSelectList('news');
+        $typeList = AppNewsModel::getTypeList();
         $statusList = AppNewsModel::getStatusList();
 
-        $this->view->assign('collectTypeList', $collectTypeList);
-        $this->view->assign('newsTypeList', $newsTypeList);
-        $this->view->assign('sourceList', $sourceList);
+        $this->view->assign('categoryList', $categoryList);
+        $this->view->assign('typeList', $typeList);
         $this->view->assign('statusList', $statusList);
 
-        $this->assignconfig('collectTypeList', $collectTypeList);
-        $this->assignconfig('newsTypeList', $newsTypeList);
-        $this->assignconfig('sourceList', $sourceList);
+        $this->assignconfig('categoryList', $categoryList);
+        $this->assignconfig('typeList', $typeList);
         $this->assignconfig('statusList', $statusList);
-        // 确保富文本编辑器配置存在（插件未注入时兜底）
         $this->assignconfig('simditor', [
             'classname'          => '.editor',
             'height'             => '300',
@@ -56,6 +53,34 @@ class News extends Backend
             'isdompurify'        => 0,
             'allowiframeprefixs' => [],
         ]);
+    }
+
+    /**
+     * 查看
+     */
+    public function index()
+    {
+        $this->request->filter(['strip_tags', 'trim']);
+        if ($this->request->isAjax()) {
+            if ($this->request->request('keyField')) {
+                return $this->selectpage();
+            }
+            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            $list = $this->model
+                ->where($where)
+                ->order($sort, $order)
+                ->paginate($limit);
+            $categoryMap = AppNewsCategoryModel::where('collect', 'news')->column('title', 'id');
+            $rows = [];
+            foreach ($list->items() as $item) {
+                $row = $item instanceof \think\Model ? $item->toArray() : (array)$item;
+                $cid = (int)($row['category_id'] ?? 0);
+                $row['category_text'] = $categoryMap[$cid] ?? '-';
+                $rows[] = $row;
+            }
+            return json(['total' => $list->total(), 'rows' => $rows]);
+        }
+        return $this->view->fetch();
     }
 
     public function add()

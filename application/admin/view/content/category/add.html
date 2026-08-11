@@ -1,0 +1,35 @@
+<form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
+    {:token()}
+    <div class="form-group">
+        <label for="c-title" class="control-label col-xs-12 col-sm-2">{:__('Title')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-title" class="form-control" name="row[title]" type="text" value="" maxlength="255" data-rule="required;length(1~255)">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Collect')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            {:build_select('row[collect]', $collectList, 'news', ['class'=>'form-control selectpicker', 'id'=>'c-collect', 'data-rule'=>'required'])}
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="c-sort" class="control-label col-xs-12 col-sm-2">{:__('Sort')}:</label>
+        <div class="col-xs-12 col-sm-4">
+            <input id="c-sort" class="form-control" name="row[sort]" type="number" value="0" min="0" data-rule="integer">
+            <span class="help-block">{:__('Sort tips')}</span>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Status')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            {:build_radios('row[status]', $statusList, 1)}
+        </div>
+    </div>
+    <div class="form-group layer-footer">
+        <label class="control-label col-xs-12 col-sm-2"></label>
+        <div class="col-xs-12 col-sm-8">
+            <button type="submit" class="btn btn-primary btn-embossed disabled">{:__('OK')}</button>
+            <button type="reset" class="btn btn-default btn-embossed">{:__('Reset')}</button>
+        </div>
+    </div>
+</form>
