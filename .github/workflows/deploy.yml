@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-      - name: 在服务器上拉取代码
+      - name: 在服务器${{ secrets.SERVER_HOST }}上拉取代码
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.SERVER_HOST }}
