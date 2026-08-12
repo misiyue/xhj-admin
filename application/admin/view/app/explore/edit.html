@@ -22,6 +22,12 @@
         </div>
     </div>
     <div class="form-group">
+        <label for="c-digest" class="control-label col-xs-12 col-sm-2">{:__('Digest')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-digest" class="form-control" name="row[digest]" type="text" value="{$row.digest|default=''|htmlentities}" maxlength="128" data-rule="length(0~128)" placeholder="{:__('Digest')}">
+        </div>
+    </div>
+    <div class="form-group">
         <label for="c-url" class="control-label col-xs-12 col-sm-2">{:__('Url')}:</label>
         <div class="col-xs-12 col-sm-8">
             <input id="c-url" class="form-control" name="row[url]" type="text" value="{$row.url|default=''|htmlentities}">
