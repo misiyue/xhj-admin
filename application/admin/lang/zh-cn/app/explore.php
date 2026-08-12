@@ -3,6 +3,7 @@
 return [
     'Title'               => '标题',
     'Image'               => '图片',
+    'Digest'              => '描述',
     'Url'                 => '链接',
     'Is_open'             => '是否开放',
     'Sort'                => '排序',

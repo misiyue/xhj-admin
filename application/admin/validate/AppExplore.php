@@ -9,6 +9,7 @@ class AppExplore extends Validate
     protected $rule = [
         'title'    => 'max:16',
         'image'    => 'max:255',
+        'digest'   => 'max:128',
         'url'      => 'max:255',
         'is_open'  => 'require|in:1,2',
         'position' => 'checkPosition',
@@ -16,8 +17,8 @@ class AppExplore extends Validate
     ];
 
     protected $scene = [
-        'add'  => ['title', 'image', 'url', 'is_open', 'position', 'sort'],
-        'edit' => ['title', 'image', 'url', 'is_open', 'position', 'sort'],
+        'add'  => ['title', 'image', 'digest', 'url', 'is_open', 'position', 'sort'],
+        'edit' => ['title', 'image', 'digest', 'url', 'is_open', 'position', 'sort'],
     ];
 
     /**

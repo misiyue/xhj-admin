@@ -41,6 +41,11 @@ class AppExplore extends Model
         return $value;
     }
 
+    public function setDigestAttr($value)
+    {
+        return $value === '' ? null : $value;
+    }
+
     public static function getIsOpenList()
     {
         return [
