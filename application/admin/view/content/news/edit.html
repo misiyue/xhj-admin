@@ -62,7 +62,13 @@
     <div class="form-group" id="content-video-group"{if !isset($row.type_id) || $row.type_id != 2} style="display:none;"{/if}>
         <label for="c-content-video" class="control-label col-xs-12 col-sm-2">{:__('Content')}:</label>
         <div class="col-xs-12 col-sm-8">
-            <input id="c-content-video" class="form-control" type="text" value="{$row.content|default=''|htmlentities}" maxlength="2000" placeholder="https://"{if isset($row.type_id) && $row.type_id == 2} name="row[content]"{/if}>
+            <div class="input-group">
+                <input id="c-content-video" class="form-control" type="text" value="{$row.content|default=''|htmlentities}" maxlength="2000" placeholder="{:__('Content video upload placeholder')}"{if isset($row.type_id) && $row.type_id == 2} name="row[content]"{/if}>
+                <div class="input-group-addon no-border no-padding">
+                    <span><button type="button" id="btn-upload-content-video" class="btn btn-danger"><i class="fa fa-upload"></i> {:__('Upload video')}</button></span>
+                </div>
+            </div>
+            <input id="file-content-video" type="file" accept="video/mp4,video/webm,video/quicktime,video/x-msvideo,video/x-matroska,.mp4,.webm,.mov,.avi,.mkv,.m4v,.3gp" style="display:none;">
             <div id="video-preview-wrap" class="video-preview-wrap" style="display:none;margin-top:10px;">
                 <video id="c-content-video-preview" class="video-preview" controls preload="metadata" playsinline style="max-width:100%;max-height:360px;background:#000;"></video>
             </div>

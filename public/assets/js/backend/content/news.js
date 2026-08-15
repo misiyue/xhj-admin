@@ -188,10 +188,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'upload'], function (
                     }
 
                     editor.uploader.on('beforeupload', function (e, file) {
-                        Upload.api.send(file.obj, function (data) {
+                        Controller.api.uploadOssFile(file.obj, 'image', function (data) {
                             editor.uploader.trigger('uploadsuccess', [file, {
                                 success: true,
-                                file_path: Fast.api.cdnurl(data.url, true)
+                                file_path: data.fullurl || data.url || ''
                             }]);
                         });
                         return false;
@@ -229,6 +229,78 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'upload'], function (
                     return $.trim($videoInput.val() || '');
                 }
                 return $.trim($('#c-content', form).val() || '');
+            },
+            /**
+             * 上传文件至 OSS（资讯专用）
+             */
+            uploadOssFile: function (file, type, onSuccess, onError) {
+                var formData = new FormData();
+                formData.append('file', file);
+                var uploadUrl = (Config.newsOss && Config.newsOss.imageUploadUrl) || 'content/news/uploadOssImage';
+                if (type === 'video') {
+                    uploadUrl = (Config.newsOss && Config.newsOss.videoUploadUrl) || 'content/news/uploadOssVideo';
+                }
+                Fast.api.ajax({
+                    url: Fast.api.fixurl(uploadUrl),
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                }, function (data) {
+                    if (typeof onSuccess === 'function') {
+                        onSuccess(data || {});
+                    }
+                }, onError);
+            },
+            /**
+             * 校验本地选择的视频文件
+             */
+            isVideoFile: function (file) {
+                if (!file) {
+                    return false;
+                }
+                var name = (file.name || '').toLowerCase();
+                var ext = name.indexOf('.') > -1 ? name.split('.').pop() : '';
+                var allowedExt = ['mp4', 'webm', 'mov', 'avi', 'mkv', 'm4v', '3gp'];
+                if (ext && allowedExt.indexOf(ext) === -1) {
+                    return false;
+                }
+                if (file.type && file.type.indexOf('video/') !== 0) {
+                    return false;
+                }
+                return true;
+            },
+            bindVideoUpload: function (form) {
+                form.off('click.newsVideoUpload', '#btn-upload-content-video').on('click.newsVideoUpload', '#btn-upload-content-video', function () {
+                    $('#file-content-video', form).val('').trigger('click');
+                });
+                form.off('change.newsVideoUpload', '#file-content-video').on('change.newsVideoUpload', '#file-content-video', function () {
+                    var file = this.files && this.files[0];
+                    if (!file) {
+                        return;
+                    }
+                    if (!Controller.api.isVideoFile(file)) {
+                        Toastr.error('请选择有效的视频文件（mp4、webm、mov 等）');
+                        $(this).val('');
+                        return;
+                    }
+                    var loading = Layer.msg(__('Uploading'), {icon: 16, time: 0, shade: 0.1});
+                    Controller.api.uploadOssFile(file, 'video', function (data) {
+                        Layer.close(loading);
+                        var url = data.fullurl || data.url || '';
+                        if (!url) {
+                            Toastr.error('上传成功但未返回链接');
+                            return;
+                        }
+                        $('#c-content-video', form).val(url).trigger('change');
+                        form.data('previewVideoUrlChanged', true);
+                        form.data('coverManual', false);
+                        Controller.api.updateVideoPreview(form);
+                        Toastr.success(__('Uploaded successful'));
+                    }, function () {
+                        Layer.close(loading);
+                    });
+                    $(this).val('');
+                });
             },
             /**
              * 校验是否为可播放的视频链接（http(s) 或站点相对路径）
@@ -279,7 +351,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'upload'], function (
                     Controller.api.clearVideoPreview(form);
                     return;
                 }
-                var playUrl = Fast.api.cdnurl(url, true);
+                var playUrl = (url.indexOf('http://') === 0 || url.indexOf('https://') === 0) ? url : Fast.api.cdnurl(url, true);
                 var videoEl = $video[0];
                 var sameOrigin = playUrl.indexOf(location.origin) === 0 || !/^https?:\/\//i.test(playUrl);
                 if (!sameOrigin) {
@@ -511,9 +583,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'upload'], function (
                         } catch (e) {
                         }
                     }
-                    Upload.api.send(file, function (data) {
-                        if (data && data.url) {
-                            resolve(data.url);
+                    Controller.api.uploadOssFile(file, 'image', function (data) {
+                        var url = data.url || data.fullurl || '';
+                        if (url) {
+                            resolve(url);
                         } else {
                             reject(new Error('upload empty url'));
                         }
@@ -637,6 +710,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'upload'], function (
                     form.data('coverManual', true);
                     form.data('autoCoverVideoUrl', $.trim($('#c-content-video', form).val() || ''));
                 });
+                Controller.api.bindVideoUpload(form);
                 Controller.api.switchContentByType(form);
                 $(document).off('click.newsSimditor', '.layui-layer-footer .btn-primary').on('click.newsSimditor', '.layui-layer-footer .btn-primary', function () {
                     Controller.api.syncEditor(form);
