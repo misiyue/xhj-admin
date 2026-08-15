@@ -76,7 +76,11 @@ class News extends Backend
         try {
             $oss = new OssStorage();
             $result = $oss->uploadImage($file);
-            $this->success(__('Uploaded successful'), '', '0000000');
+            return json([
+                'code' => 1,
+                'msg'  => __('Uploaded successful'),
+                'data' => $result,
+            ]);
         } catch (\Exception $e) {
             $this->error($e->getMessage());
         }
