@@ -5,6 +5,8 @@ namespace app\admin\controller\content;
 use app\admin\model\AppNews as AppNewsModel;
 use app\admin\model\AppNewsCategory as AppNewsCategoryModel;
 use app\common\controller\Backend;
+use app\common\library\OssStorage;
+use think\Config;
 
 /**
  * 火箭资讯
@@ -25,6 +27,8 @@ class News extends Backend
     protected $modelSceneValidate = true;
 
     protected $multiFields = 'status';
+
+    protected $noNeedRight = ['uploadOssImage', 'uploadOssVideo'];
 
     public function _initialize()
     {
@@ -53,6 +57,52 @@ class News extends Backend
             'isdompurify'        => 0,
             'allowiframeprefixs' => [],
         ]);
+        $this->assignconfig('newsOss', [
+            'imageUploadUrl' => url('content/news/uploadOssImage'),
+            'videoUploadUrl' => url('content/news/uploadOssVideo'),
+        ]);
+    }
+
+    /**
+     * 富文本图片上传至 OSS
+     */
+    public function uploadOssImage()
+    {
+        Config::set('default_return_type', 'json');
+        $file = $this->request->file('file');
+        if (!$file) {
+            $this->error(__('No file upload or server upload limit exceeded'));
+        }
+        try {
+            $oss = new OssStorage();
+            $result = $oss->uploadImage($file);
+            $this->success(__('Uploaded successful'), '', '0000000');
+        } catch (\Exception $e) {
+            $this->error($e->getMessage());
+        }
+    }
+
+    /**
+     * 视频正文上传至 OSS
+     */
+    public function uploadOssVideo()
+    {
+        Config::set('default_return_type', 'json');
+        $file = $this->request->file('file');
+        if (!$file) {
+            $this->error(__('No file upload or server upload limit exceeded'));
+        }
+        try {
+            $oss = new OssStorage();
+            $result = $oss->uploadVideo($file);
+            return json([
+                'code' => 1,
+                'msg'  => __('Uploaded successful'),
+                'data' => $result,
+            ]);
+        } catch (\Exception $e) {
+            $this->error($e->getMessage());
+        }
     }
 
     /**
