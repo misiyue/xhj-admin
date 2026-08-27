@@ -7,18 +7,18 @@ use think\Validate;
 class AppExplore extends Validate
 {
     protected $rule = [
-        'title'    => 'max:16',
+        'title'    => 'max:64',
         'image'    => 'max:255',
         'digest'   => 'max:128',
         'url'      => 'max:255',
-        'is_open'  => 'require|in:1,2',
+        'ends'     => 'max:32',
         'position' => 'checkPosition',
         'sort'     => 'checkSort',
     ];
 
     protected $scene = [
-        'add'  => ['title', 'image', 'digest', 'url', 'is_open', 'position', 'sort'],
-        'edit' => ['title', 'image', 'digest', 'url', 'is_open', 'position', 'sort'],
+        'add'  => ['title', 'image', 'digest', 'url', 'ends', 'position', 'sort'],
+        'edit' => ['title', 'image', 'digest', 'url', 'ends', 'position', 'sort'],
     ];
 
     /**

@@ -27,9 +27,9 @@ class Explore extends Backend
     {
         parent::_initialize();
         $this->model = new AppExplore;
-        $list = AppExplore::getIsOpenList();
-        $this->view->assign('isOpenList', $list);
-        $this->assignconfig('isOpenList', $list);
+        $endsList = AppExplore::getEndsList();
+        $this->view->assign('endsList', $endsList);
+        $this->assignconfig('endsList', $endsList);
         $posList = AppExplore::getPositionList();
         $this->view->assign('positionList', $posList);
         $this->assignconfig('positionList', $posList);
