@@ -21,6 +21,7 @@ class AppExplore extends Model
             'idxBanner' => __('Position index banner'),
             'tab'       => __('Position tab'),
             'game'      => __('Position game'),
+            'appBtmTab' => __('Position app bottom tab'),
         ];
     }
 
