@@ -23,7 +23,7 @@ class OssStorage
      * @return array{url:string,fullurl:string,path:string}
      * @throws \Exception
      */
-    public function uploadImage(File $file)
+    public function uploadImage(File $file, $dir = 'upload/image')
     {
         $info = $file->getInfo();
         $suffix = strtolower(pathinfo($info['name'], PATHINFO_EXTENSION));
@@ -40,7 +40,7 @@ class OssStorage
             throw new \Exception('图片文件无效或已损坏');
         }
 
-        return $this->putObject($file->getRealPath() ?: $info['tmp_name'], $suffix, $mime, 'news/image');
+        return $this->putObject($file->getRealPath() ?: $info['tmp_name'], $suffix, $mime, $dir);
     }
 
     /**

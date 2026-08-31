@@ -367,6 +367,10 @@ class Upload
         $this->checkMimetype();
         $this->checkImage();
 
+        if (Config::get('upload.image_storage', 'oss') === 'oss' && $this->isImageFile()) {
+            return $this->uploadToOss();
+        }
+
         $savekey = $savekey ? $savekey : $this->getSavekey();
         $savekey = '/' . ltrim($savekey, '/');
         $uploadDir = substr($savekey, 0, strripos($savekey, '/') + 1);
@@ -419,6 +423,63 @@ class Upload
             'sha1'        => $sha1,
             'extparam'    => '',
         );
+        $attachment = new Attachment();
+        $attachment->data(array_filter($params));
+        $attachment->save();
+
+        \think\Hook::listen("upload_after", $attachment);
+        return $attachment;
+    }
+
+    /**
+     * 是否为图片文件
+     * @return bool
+     */
+    protected function isImageFile()
+    {
+        $imageTypes = ['image/gif', 'image/jpg', 'image/jpeg', 'image/bmp', 'image/png', 'image/webp'];
+        $imageSuffixes = ['gif', 'jpg', 'jpeg', 'bmp', 'png', 'webp'];
+        return in_array($this->fileInfo['type'], $imageTypes, true)
+            || in_array($this->fileInfo['suffix'], $imageSuffixes, true);
+    }
+
+    /**
+     * 上传图片至 OSS
+     * @return Attachment|\think\Model
+     * @throws UploadException
+     */
+    protected function uploadToOss()
+    {
+        $category = request()->post('category');
+        $category = array_key_exists($category, config('site.attachmentcategory') ?? []) ? $category : 'all';
+        $dir = 'upload/' . $category . '/image';
+
+        try {
+            $oss = new OssStorage();
+            $result = $oss->uploadImage($this->file, $dir);
+        } catch (\Exception $e) {
+            throw new UploadException($e->getMessage());
+        }
+
+        $auth = Auth::instance();
+        $sha1 = $this->file->hash();
+        $params = [
+            'admin_id'    => (int)session('admin.id'),
+            'user_id'     => (int)$auth->id,
+            'filename'    => mb_substr(htmlspecialchars(strip_tags($this->fileInfo['name'])), 0, 100),
+            'category'    => array_key_exists(request()->post('category'), config('site.attachmentcategory') ?? []) ? request()->post('category') : '',
+            'filesize'    => $this->fileInfo['size'],
+            'imagewidth'  => $this->fileInfo['imagewidth'],
+            'imageheight' => $this->fileInfo['imageheight'],
+            'imagetype'   => $this->fileInfo['suffix'],
+            'imageframes' => 0,
+            'mimetype'    => $this->fileInfo['type'],
+            'url'         => $result['url'],
+            'uploadtime'  => time(),
+            'storage'     => 'oss',
+            'sha1'        => $sha1,
+            'extparam'    => $result['path'] ?? '',
+        ];
         $attachment = new Attachment();
         $attachment->data(array_filter($params));
         $attachment->save();
