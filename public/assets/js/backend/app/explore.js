@@ -1,5 +1,22 @@
 define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefined, Backend, Table, Form) {
 
+    var endsLabel = function (value) {
+        if (!value) {
+            return '-';
+        }
+        var list = Config.endsList || {};
+        var parts = String(value).split(',');
+        var html = [];
+        $.each(parts, function (i, part) {
+            part = $.trim(part);
+            if (!part) {
+                return;
+            }
+            html.push('<span class="label label-info">' + (list[part] || part) + '</span> ');
+        });
+        return html.length ? html.join('') : '-';
+    };
+
     var Controller = {
         index: function () {
             Table.api.init({
@@ -8,7 +25,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     add_url: 'app/explore/add',
                     edit_url: 'app/explore/edit',
                     del_url: 'app/explore/del',
-                    multi_url: 'app/explore/multi',
                     table: 'app_explore',
                 }
             });
@@ -32,6 +48,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             formatter: Table.api.formatter.image,
                             operate: false
                         },
+                        {field: 'digest', title: __('Digest'), operate: 'LIKE'},
                         {
                             field: 'url',
                             title: __('Url'),
@@ -46,18 +63,17 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             operate: '='
                         },
                         {
+                            field: 'ends',
+                            title: __('Ends'),
+                            operate: 'LIKE',
+                            formatter: endsLabel
+                        },
+                        {
                             field: 'sort',
                             title: __('Sort'),
                             operate: 'BETWEEN',
                             sortable: true,
                             width: 90
-                        },
-                        {
-                            field: 'is_open',
-                            title: __('Is_open'),
-                            searchList: Config.isOpenList,
-                            formatter: Table.api.formatter.normal,
-                            operate: '='
                         },
                         {
                             field: 'created_at',

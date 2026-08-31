@@ -23,15 +23,13 @@ class Module extends Backend
 
     protected $modelSceneValidate = true;
 
-    protected $multiFields = 'is_open';
-
     public function _initialize()
     {
         parent::_initialize();
         $this->model = new AppModuleModel;
-        $isOpenList = AppModuleModel::getIsOpenList();
-        $this->view->assign('isOpenList', $isOpenList);
-        $this->assignconfig('isOpenList', $isOpenList);
+        $endsList = AppModuleModel::getEndsList();
+        $this->view->assign('endsList', $endsList);
+        $this->assignconfig('endsList', $endsList);
     }
 
     public function add()

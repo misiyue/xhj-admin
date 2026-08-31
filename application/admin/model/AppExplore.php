@@ -11,7 +11,6 @@ class AppExplore extends Model
 {
     protected $name = 'app_explore';
 
-    /** 不在模型层自动写入创建/更新时间，由库表 DEFAULT 或业务自行维护 */
     protected $autoWriteTimestamp = false;
 
     public static function getPositionList()
@@ -22,6 +21,16 @@ class AppExplore extends Model
             'idxBanner' => __('Position index banner'),
             'tab'       => __('Position tab'),
             'game'      => __('Position game'),
+            'appBtmTab' => __('Position app bottom tab'),
+        ];
+    }
+
+    public static function getEndsList()
+    {
+        return [
+            'h5'  => __('End h5'),
+            'pc'  => __('End pc'),
+            'app' => __('End app'),
         ];
     }
 
@@ -46,11 +55,11 @@ class AppExplore extends Model
         return $value === '' ? null : $value;
     }
 
-    public static function getIsOpenList()
+    public function setEndsAttr($value)
     {
-        return [
-            1 => __('Explore open yes'),
-            2 => __('Explore open no'),
-        ];
+        if (is_array($value)) {
+            return implode(',', array_filter(array_values($value)));
+        }
+        return $value;
     }
 }

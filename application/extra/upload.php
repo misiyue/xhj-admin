@@ -44,6 +44,10 @@ return [
      */
     'fullmode' => false,
     /**
+     * 图片存储：oss=阿里云OSS，local=本地
+     */
+    'image_storage' => 'oss',
+    /**
      * 缩略图样式
      */
     'thumbstyle' => '',

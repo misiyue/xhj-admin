@@ -7,18 +7,18 @@ use think\Validate;
 class AppExplore extends Validate
 {
     protected $rule = [
-        'title'    => 'max:16',
+        'title'    => 'max:64',
         'image'    => 'max:255',
         'digest'   => 'max:128',
         'url'      => 'max:255',
-        'is_open'  => 'require|in:1,2',
+        'ends'     => 'max:32',
         'position' => 'checkPosition',
         'sort'     => 'checkSort',
     ];
 
     protected $scene = [
-        'add'  => ['title', 'image', 'digest', 'url', 'is_open', 'position', 'sort'],
-        'edit' => ['title', 'image', 'digest', 'url', 'is_open', 'position', 'sort'],
+        'add'  => ['title', 'image', 'digest', 'url', 'ends', 'position', 'sort'],
+        'edit' => ['title', 'image', 'digest', 'url', 'ends', 'position', 'sort'],
     ];
 
     /**
@@ -37,7 +37,7 @@ class AppExplore extends Validate
     }
 
     /**
-     * 位置：空或 indexTop / indexTMid / idxBanner / tab / game
+     * 位置：空或 indexTop / indexTMid / idxBanner / tab / game / appBtmTab
      */
     protected function checkPosition($value, $rule, $data = [], $field = '', $title = '')
     {
@@ -47,7 +47,7 @@ class AppExplore extends Validate
         if (!is_string($value) || strlen($value) > 16) {
             return __('Position invalid');
         }
-        if (!in_array($value, ['indexTop', 'indexTMid', 'idxBanner', 'tab', 'game'], true)) {
+        if (!in_array($value, ['indexTop', 'indexTMid', 'idxBanner', 'tab', 'game', 'appBtmTab'], true)) {
             return __('Position invalid');
         }
         return true;

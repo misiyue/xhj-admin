@@ -1,5 +1,22 @@
 define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefined, Backend, Table, Form) {
 
+    var endsLabel = function (value) {
+        if (!value) {
+            return '-';
+        }
+        var list = Config.endsList || {};
+        var parts = String(value).split(',');
+        var html = [];
+        $.each(parts, function (i, part) {
+            part = $.trim(part);
+            if (!part) {
+                return;
+            }
+            html.push('<span class="label label-info">' + (list[part] || part) + '</span> ');
+        });
+        return html.length ? html.join('') : '-';
+    };
+
     var Controller = {
         index: function () {
             Table.api.init({
@@ -8,7 +25,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     add_url: 'app/module/add',
                     edit_url: 'app/module/edit',
                     del_url: 'app/module/del',
-                    multi_url: 'app/module/multi',
                     table: 'app_module',
                 }
             });
@@ -27,14 +43,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'code', title: __('Code'), operate: 'LIKE'},
                         {field: 'title', title: __('Title'), operate: 'LIKE'},
                         {
-                            field: 'is_open',
-                            title: __('Is_open'),
-                            searchList: Config.isOpenList,
-                            formatter: Table.api.formatter.toggle,
-                            yes: 1,
-                            no: 0,
-                            table: table,
-                            operate: '='
+                            field: 'ends',
+                            title: __('Ends'),
+                            operate: 'LIKE',
+                            formatter: endsLabel
                         },
                         {
                             field: 'created_at',
