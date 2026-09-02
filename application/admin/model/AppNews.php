@@ -31,7 +31,10 @@ class AppNews extends Model
                 $row['cover'] = $url;
             }
         };
-        self::beforeInsert($fillCover);
+        self::beforeInsert(function ($row) use ($fillCover) {
+            $fillCover($row);
+            $row['pv'] = mt_rand(500, 1000);
+        });
         self::beforeUpdate($fillCover);
     }
 
