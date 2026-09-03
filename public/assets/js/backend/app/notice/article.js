@@ -81,8 +81,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'upload', 'addons'], 
         },
         api: {
             editorMode: 'rich',
+            contentCache: '',
+            initializing: false,
+            getTextarea: function (form) {
+                return $('#c-content', form);
+            },
             getEditorId: function (form) {
-                var $textarea = $('#c-content', form);
+                var $textarea = Controller.api.getTextarea(form);
                 var id = $textarea.attr('id') || 'c-content';
                 $textarea.attr('id', id);
                 return id;
@@ -100,49 +105,96 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'upload', 'addons'], 
             textTypeFromMode: function (mode) {
                 return mode === 'plain' ? 2 : 1;
             },
-            syncEditor: function (form) {
-                if (Controller.api.editorMode !== 'rich') {
-                    return;
-                }
-                if (!window.Simditor || !Simditor.list) {
-                    return;
-                }
+            readContent: function (form) {
+                var $textarea = Controller.api.getTextarea(form);
                 var id = Controller.api.getEditorId(form);
-                if (Simditor.list[id]) {
-                    $('#c-content', form).val(Simditor.list[id].getValue());
-                }
-            },
-            destroyEditor: function (form) {
-                var $textarea = $('#c-content', form);
-                var id = Controller.api.getEditorId(form);
-                if (window.Simditor && Simditor.list && Simditor.list[id]) {
+                if (Controller.api.editorMode === 'rich' && window.Simditor && Simditor.list && Simditor.list[id]) {
                     try {
-                        $textarea.val(Simditor.list[id].getValue());
-                        Simditor.list[id].destroy();
+                        Controller.api.contentCache = Simditor.list[id].getValue();
+                        $textarea.val(Controller.api.contentCache);
+                        return Controller.api.contentCache;
                     } catch (e) {
                     }
-                    delete Simditor.list[id];
                 }
+                Controller.api.contentCache = $textarea.val() || Controller.api.contentCache || '';
+                return Controller.api.contentCache;
+            },
+            writeContent: function (form, content) {
+                content = content == null ? '' : String(content);
+                Controller.api.contentCache = content;
+                Controller.api.getTextarea(form).val(content);
+            },
+            cleanupDom: function (form) {
+                var $textarea = Controller.api.getTextarea(form);
+                // 清理残留的 simditor 外壳
+                $textarea.siblings('.simditor').remove();
+                $textarea.prev('.simditor').remove();
+                $textarea.next('.simditor').remove();
+                $textarea.parent().children('.simditor').each(function () {
+                    if (!$(this).find($textarea).length) {
+                        $(this).remove();
+                    }
+                });
                 $textarea.removeClass('editor').show().css({
                     display: 'block',
                     visibility: 'visible',
                     width: '100%',
                     height: 'auto',
-                    minHeight: '200px'
-                }).attr('rows', 12);
+                    minHeight: '200px',
+                    opacity: 1
+                });
+            },
+            syncEditor: function (form) {
+                Controller.api.readContent(form);
+            },
+            destroyEditor: function (form) {
+                var content = Controller.api.readContent(form);
+                var id = Controller.api.getEditorId(form);
+                if (window.Simditor && Simditor.list && Simditor.list[id]) {
+                    try {
+                        Simditor.list[id].destroy();
+                    } catch (e) {
+                    }
+                    try {
+                        delete Simditor.list[id];
+                    } catch (e2) {
+                        Simditor.list[id] = null;
+                    }
+                }
+                Controller.api.cleanupDom(form);
+                Controller.api.writeContent(form, content);
+                Controller.api.getTextarea(form).attr('rows', 12);
             },
             initEditor: function (form) {
-                var $textarea = $('#c-content', form);
+                if (Controller.api.initializing || Controller.api.editorMode !== 'rich') {
+                    return;
+                }
+                var $textarea = Controller.api.getTextarea(form);
                 if (!$textarea.length) {
                     return;
                 }
                 var id = Controller.api.getEditorId(form);
-                $textarea.addClass('editor');
+                var content = Controller.api.readContent(form);
+
+                // 已有实例时只同步内容，不重复创建
                 if (window.Simditor && Simditor.list && Simditor.list[id]) {
+                    try {
+                        Simditor.list[id].setValue(content);
+                    } catch (e) {
+                    }
                     return;
                 }
+
+                Controller.api.cleanupDom(form);
+                Controller.api.writeContent(form, content);
+                $textarea.addClass('editor');
+                Controller.api.initializing = true;
+
                 require(['simditor'], function (Simditor) {
+                    Controller.api.initializing = false;
                     if (Controller.api.editorMode !== 'rich') {
+                        Controller.api.cleanupDom(form);
+                        Controller.api.writeContent(form, Controller.api.contentCache);
                         return;
                     }
                     if (!Simditor) {
@@ -154,9 +206,18 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'upload', 'addons'], 
                     if (!Simditor.list) {
                         Simditor.list = {};
                     }
+                    // 异步回来时再次清理，防止重复实例
                     if (Simditor.list[id]) {
-                        return;
+                        try {
+                            Simditor.list[id].destroy();
+                        } catch (e) {
+                        }
+                        delete Simditor.list[id];
                     }
+                    Controller.api.cleanupDom(form);
+                    $textarea = Controller.api.getTextarea(form).addClass('editor');
+                    Controller.api.writeContent(form, Controller.api.contentCache);
+
                     var cfg = $.extend({
                         height: 250,
                         minHeight: 250,
@@ -178,6 +239,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'upload', 'addons'], 
                         defaultImage: (Config.__CDN__ || '') + '/assets/addons/simditor/images/image.png',
                         upload: {url: '/'}
                     });
+
+                    // 强制写回缓存内容，避免初始化后变空
+                    try {
+                        editor.setValue(Controller.api.contentCache || '');
+                    } catch (e) {
+                    }
 
                     var $selectImage = editor.toolbar.wrapper.find('.menu-item-select-image');
                     if ($selectImage.length) {
@@ -207,7 +274,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'upload', 'addons'], 
                         });
                     }
                     var syncValue = function () {
-                        $textarea.val(editor.getValue());
+                        try {
+                            Controller.api.contentCache = editor.getValue();
+                            $textarea.val(Controller.api.contentCache);
+                        } catch (e) {
+                        }
                     };
                     editor.on('blur', function () {
                         syncValue();
@@ -223,13 +294,17 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'upload', 'addons'], 
                     Simditor.list[id] = editor;
                 });
             },
-            switchEditorMode: function (form, mode) {
-                var textType = Controller.api.textTypeFromMode(mode);
+            updateModeButtons: function (form, mode) {
                 var $btns = $('.btn-editor-mode', form);
                 $btns.removeClass('btn-primary active').addClass('btn-default');
                 $btns.filter('[data-mode="' + mode + '"]').removeClass('btn-default').addClass('btn-primary active');
+            },
+            switchEditorMode: function (form, mode) {
+                // 切换前先固化当前内容
+                Controller.api.readContent(form);
+                Controller.api.updateModeButtons(form, mode);
                 Controller.api.editorMode = mode;
-                Controller.api.setTextType(form, textType);
+                Controller.api.setTextType(form, Controller.api.textTypeFromMode(mode));
                 if (mode === 'plain') {
                     Controller.api.destroyEditor(form);
                 } else {
@@ -237,11 +312,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'upload', 'addons'], 
                 }
             },
             bindEditorToggle: function (form) {
-                form.off('click.editorMode', '.btn-editor-mode').on('click.editorMode', '.btn-editor-mode', function () {
+                form.off('click.editorMode', '.btn-editor-mode').on('click.editorMode', '.btn-editor-mode', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
                     var mode = $(this).data('mode') || 'rich';
-                    if (mode === Controller.api.editorMode) {
-                        return;
-                    }
+                    // 即使状态异常也允许强制切换，避免卡死
                     Controller.api.switchEditorMode(form, mode);
                 });
             },
@@ -249,28 +324,28 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'upload', 'addons'], 
                 var form = $("form[role=form]");
                 var textType = Controller.api.getTextType(form);
                 var mode = Controller.api.modeFromTextType(textType);
+
+                // 禁止 addons 自动初始化，完全由本页控制，避免竞态
+                var $textarea = Controller.api.getTextarea(form).removeClass('editor');
+                Controller.api.contentCache = $textarea.val() || '';
                 Controller.api.editorMode = mode;
                 Controller.api.setTextType(form, textType);
-
-                if (mode === 'plain') {
-                    $('#c-content', form).removeClass('editor');
-                } else {
-                    $('#c-content', form).addClass('editor');
-                }
+                Controller.api.updateModeButtons(form, mode);
 
                 form.data('validator-options', $.extend({}, form.data('validator-options') || {}, {
-                    ignore: ':hidden:not(.editor,#c-content)'
+                    ignore: ':hidden:not(#c-content)'
                 }));
                 Form.api.bindevent(form, null, null, function () {
                     Controller.api.syncEditor(form);
                     return true;
                 });
 
-                // 纯文本：确保不会被后续异步初始化成富文本
-                if (mode === 'plain') {
-                    setTimeout(function () {
-                        Controller.api.destroyEditor(form);
-                    }, 0);
+                if (mode === 'rich') {
+                    Controller.api.initEditor(form);
+                } else {
+                    Controller.api.cleanupDom(form);
+                    Controller.api.writeContent(form, Controller.api.contentCache);
+                    $textarea.attr('rows', 12);
                 }
 
                 Controller.api.bindEditorToggle(form);
