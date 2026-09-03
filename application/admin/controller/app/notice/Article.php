@@ -17,7 +17,7 @@ class Article extends Backend
      */
     protected $model = null;
 
-    protected $searchFields = 'id,title,content';
+    protected $searchFields = 'id,code,title,content';
 
     protected $modelValidate = true;
 
@@ -30,8 +30,11 @@ class Article extends Backend
         parent::_initialize();
         $this->model = new NoticeArticleModel;
         $statusList = NoticeArticleModel::getStatusList();
+        $textTypeList = NoticeArticleModel::getTextTypeList();
         $this->view->assign('statusList', $statusList);
+        $this->view->assign('textTypeList', $textTypeList);
         $this->assignconfig('statusList', $statusList);
+        $this->assignconfig('textTypeList', $textTypeList);
         if (empty($this->view->config['simditor'])) {
             $this->assignconfig('simditor', [
                 'classname'          => '.editor',
