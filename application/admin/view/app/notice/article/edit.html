@@ -15,22 +15,24 @@
         </div>
     </div>
     <div class="form-group">
-        <label for="c-content" class="control-label col-xs-12 col-sm-2">{:__('Content')}:</label>
+        <label class="control-label col-xs-12 col-sm-2">{:__('Content')}:</label>
         <div class="col-xs-12 col-sm-8">
             <div class="btn-group" style="margin-bottom:8px;" role="group">
                 {eq name="row.text_type" value="2"}
-                <button type="button" class="btn btn-xs btn-default btn-editor-mode" data-mode="rich" data-text-type="1">{:__('Rich text')}</button>
-                <button type="button" class="btn btn-xs btn-primary btn-editor-mode active" data-mode="plain" data-text-type="2">{:__('Plain text')}</button>
+                <button type="button" class="btn btn-xs btn-default btn-editor-mode" data-mode="rich">{:__('Rich text')}</button>
+                <button type="button" class="btn btn-xs btn-primary btn-editor-mode active" data-mode="plain">{:__('Plain text')}</button>
                 {else/}
-                <button type="button" class="btn btn-xs btn-primary btn-editor-mode active" data-mode="rich" data-text-type="1">{:__('Rich text')}</button>
-                <button type="button" class="btn btn-xs btn-default btn-editor-mode" data-mode="plain" data-text-type="2">{:__('Plain text')}</button>
+                <button type="button" class="btn btn-xs btn-primary btn-editor-mode active" data-mode="rich">{:__('Rich text')}</button>
+                <button type="button" class="btn btn-xs btn-default btn-editor-mode" data-mode="plain">{:__('Plain text')}</button>
                 {/eq}
             </div>
-            {eq name="row.text_type" value="2"}
-            <textarea id="c-content" class="form-control" name="row[content]" rows="12" data-rule="required">{$row.content|default=''|htmlentities}</textarea>
-            {else/}
-            <textarea id="c-content" class="form-control editor" name="row[content]" rows="8" data-rule="required">{$row.content|default=''|htmlentities}</textarea>
-            {/eq}
+            <div id="content-rich-wrap"{eq name="row.text_type" value="2"} style="display:none;"{/eq}>
+                <textarea id="c-content-rich" class="form-control editor" rows="8">{$row.content|default=''|htmlentities}</textarea>
+            </div>
+            <div id="content-plain-wrap"{eq name="row.text_type" value="2"}{else/} style="display:none;"{/eq}>
+                <textarea id="c-content-plain" class="form-control" rows="12">{$row.content|default=''|htmlentities}</textarea>
+            </div>
+            <textarea id="c-content" class="hide" name="row[content]" data-rule="required">{$row.content|default=''|htmlentities}</textarea>
         </div>
     </div>
     <div class="form-group">
