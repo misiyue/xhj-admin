@@ -23,6 +23,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'addons'], function (
                     [
                         {checkbox: true},
                         {field: 'id', title: __('Id'), sortable: true},
+                        {field: 'code', title: __('Code'), operate: 'LIKE'},
                         {field: 'title', title: __('Title'), operate: 'LIKE'},
                         {
                             field: 'status',

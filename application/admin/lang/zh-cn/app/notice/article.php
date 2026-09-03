@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'Code'          => '唯一编码',
     'Title'         => '标题',
     'Content'       => '内容',
     'Content required' => '内容不能为空',

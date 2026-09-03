@@ -17,7 +17,7 @@ class Article extends Backend
      */
     protected $model = null;
 
-    protected $searchFields = 'id,title,content';
+    protected $searchFields = 'id,code,title,content';
 
     protected $modelValidate = true;
 
