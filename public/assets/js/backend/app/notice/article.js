@@ -26,6 +26,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'upload', 'addons'], 
                         {field: 'code', title: __('Code'), operate: 'LIKE'},
                         {field: 'title', title: __('Title'), operate: 'LIKE'},
                         {
+                            field: 'text_type',
+                            title: __('Text type'),
+                            operate: '=',
+                            searchList: Config.textTypeList,
+                            formatter: Table.api.formatter.normal
+                        },
+                        {
                             field: 'status',
                             title: __('Status'),
                             searchList: Config.statusList,
@@ -74,6 +81,25 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'upload', 'addons'], 
         },
         api: {
             editorMode: 'rich',
+            getEditorId: function (form) {
+                var $textarea = $('#c-content', form);
+                var id = $textarea.attr('id') || 'c-content';
+                $textarea.attr('id', id);
+                return id;
+            },
+            getTextType: function (form) {
+                var val = parseInt($('#c-text_type', form).val(), 10);
+                return val === 2 ? 2 : 1;
+            },
+            setTextType: function (form, textType) {
+                $('#c-text_type', form).val(textType === 2 ? 2 : 1);
+            },
+            modeFromTextType: function (textType) {
+                return parseInt(textType, 10) === 2 ? 'plain' : 'rich';
+            },
+            textTypeFromMode: function (mode) {
+                return mode === 'plain' ? 2 : 1;
+            },
             syncEditor: function (form) {
                 if (Controller.api.editorMode !== 'rich') {
                     return;
@@ -81,40 +107,45 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'upload', 'addons'], 
                 if (!window.Simditor || !Simditor.list) {
                     return;
                 }
-                $(".editor", form).each(function () {
-                    var id = $(this).attr('id');
-                    if (id && Simditor.list[id]) {
-                        $(this).val(Simditor.list[id].getValue());
-                    }
-                });
+                var id = Controller.api.getEditorId(form);
+                if (Simditor.list[id]) {
+                    $('#c-content', form).val(Simditor.list[id].getValue());
+                }
             },
             destroyEditor: function (form) {
                 var $textarea = $('#c-content', form);
-                var id = $textarea.attr('id');
-                if (!id || !window.Simditor || !Simditor.list || !Simditor.list[id]) {
-                    $textarea.show();
-                    return;
+                var id = Controller.api.getEditorId(form);
+                if (window.Simditor && Simditor.list && Simditor.list[id]) {
+                    try {
+                        $textarea.val(Simditor.list[id].getValue());
+                        Simditor.list[id].destroy();
+                    } catch (e) {
+                    }
+                    delete Simditor.list[id];
                 }
-                try {
-                    $textarea.val(Simditor.list[id].getValue());
-                    Simditor.list[id].destroy();
-                } catch (e) {
-                }
-                delete Simditor.list[id];
-                $textarea.show().css({display: 'block', visibility: 'visible'});
+                $textarea.removeClass('editor').show().css({
+                    display: 'block',
+                    visibility: 'visible',
+                    width: '100%',
+                    height: 'auto',
+                    minHeight: '200px'
+                }).attr('rows', 12);
             },
             initEditor: function (form) {
                 var $textarea = $('#c-content', form);
                 if (!$textarea.length) {
                     return;
                 }
-                var id = $textarea.attr('id') || 'c-content';
-                $textarea.attr('id', id).addClass('editor');
+                var id = Controller.api.getEditorId(form);
+                $textarea.addClass('editor');
                 if (window.Simditor && Simditor.list && Simditor.list[id]) {
                     return;
                 }
-                require(['css!../addons/simditor/css/simditor.min.css', 'simditor'], function (Simditor) {
+                require(['simditor'], function (Simditor) {
                     if (Controller.api.editorMode !== 'rich') {
+                        return;
+                    }
+                    if (!Simditor) {
                         return;
                     }
                     if (!window.Simditor) {
@@ -183,20 +214,25 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'upload', 'addons'], 
                         $textarea.trigger('blur');
                     });
                     editor.on('valuechanged', syncValue);
-                    editor.body.css({height: editor.opts.height, 'min-height': editor.opts.minHeight, 'overflow-y': 'auto'});
+                    if (editor.opts.height) {
+                        editor.body.css({height: editor.opts.height, 'overflow-y': 'auto'});
+                    }
+                    if (editor.opts.minHeight) {
+                        editor.body.css({'min-height': editor.opts.minHeight});
+                    }
                     Simditor.list[id] = editor;
                 });
             },
             switchEditorMode: function (form, mode) {
+                var textType = Controller.api.textTypeFromMode(mode);
                 var $btns = $('.btn-editor-mode', form);
                 $btns.removeClass('btn-primary active').addClass('btn-default');
                 $btns.filter('[data-mode="' + mode + '"]').removeClass('btn-default').addClass('btn-primary active');
                 Controller.api.editorMode = mode;
+                Controller.api.setTextType(form, textType);
                 if (mode === 'plain') {
                     Controller.api.destroyEditor(form);
-                    $('#c-content', form).removeClass('editor').attr('rows', 12);
                 } else {
-                    $('#c-content', form).addClass('editor');
                     Controller.api.initEditor(form);
                 }
             },
@@ -211,17 +247,32 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'upload', 'addons'], 
             },
             bindevent: function () {
                 var form = $("form[role=form]");
-                Controller.api.editorMode = 'rich';
-                // 先去掉 editor class，避免 addons 自动初始化；由本页可控初始化
-                $('#c-content', form).removeClass('editor');
+                var textType = Controller.api.getTextType(form);
+                var mode = Controller.api.modeFromTextType(textType);
+                Controller.api.editorMode = mode;
+                Controller.api.setTextType(form, textType);
+
+                if (mode === 'plain') {
+                    $('#c-content', form).removeClass('editor');
+                } else {
+                    $('#c-content', form).addClass('editor');
+                }
+
                 form.data('validator-options', $.extend({}, form.data('validator-options') || {}, {
-                    ignore: ':hidden:not(#c-content)'
+                    ignore: ':hidden:not(.editor,#c-content)'
                 }));
                 Form.api.bindevent(form, null, null, function () {
                     Controller.api.syncEditor(form);
                     return true;
                 });
-                Controller.api.initEditor(form);
+
+                // 纯文本：确保不会被后续异步初始化成富文本
+                if (mode === 'plain') {
+                    setTimeout(function () {
+                        Controller.api.destroyEditor(form);
+                    }, 0);
+                }
+
                 Controller.api.bindEditorToggle(form);
                 $(document).off('click.articleSimditor', '.layui-layer-footer .btn-primary').on('click.articleSimditor', '.layui-layer-footer .btn-primary', function () {
                     Controller.api.syncEditor(form);

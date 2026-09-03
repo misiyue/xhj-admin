@@ -7,15 +7,16 @@ use think\Validate;
 class NoticeArticle extends Validate
 {
     protected $rule = [
-        'code'    => 'require|max:32|unique:notice_article,code',
-        'title'   => 'max:64',
-        'content' => 'checkContent',
-        'status'  => 'in:0,1',
+        'code'      => 'require|max:32|unique:notice_article,code',
+        'title'     => 'max:64',
+        'content'   => 'checkContent',
+        'text_type' => 'require|in:1,2',
+        'status'    => 'in:0,1',
     ];
 
     protected $scene = [
-        'add'  => ['code', 'title', 'content', 'status'],
-        'edit' => ['code', 'title', 'content', 'status'],
+        'add'  => ['code', 'title', 'content', 'text_type', 'status'],
+        'edit' => ['code', 'title', 'content', 'text_type', 'status'],
     ];
 
     protected function checkContent($value, $rule, $data = [], $field = '', $title = '')

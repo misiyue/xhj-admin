@@ -1,5 +1,6 @@
 <form id="add-form" class="form-horizontal form-ajax" role="form" data-toggle="validator" method="POST" action="">
     {:token()}
+    <input type="hidden" id="c-text_type" name="row[text_type]" value="1">
     <div class="form-group">
         <label for="c-code" class="control-label col-xs-12 col-sm-2">{:__('Code')}:</label>
         <div class="col-xs-12 col-sm-8">
@@ -16,8 +17,8 @@
         <label for="c-content" class="control-label col-xs-12 col-sm-2">{:__('Content')}:</label>
         <div class="col-xs-12 col-sm-8">
             <div class="btn-group" style="margin-bottom:8px;" role="group">
-                <button type="button" class="btn btn-xs btn-primary btn-editor-mode active" data-mode="rich">{:__('Rich text')}</button>
-                <button type="button" class="btn btn-xs btn-default btn-editor-mode" data-mode="plain">{:__('Plain text')}</button>
+                <button type="button" class="btn btn-xs btn-primary btn-editor-mode active" data-mode="rich" data-text-type="1">{:__('Rich text')}</button>
+                <button type="button" class="btn btn-xs btn-default btn-editor-mode" data-mode="plain" data-text-type="2">{:__('Plain text')}</button>
             </div>
             <textarea id="c-content" class="form-control editor" name="row[content]" rows="8" data-rule="required"></textarea>
         </div>
