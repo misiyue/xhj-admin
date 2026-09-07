@@ -8,6 +8,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     index_url: 'group/group/index',
                     edit_url: 'group/group/edit',
                     member_url: 'group/member/index',
+                    faker_url: 'group/faker/index',
                     table: 'group',
                 }
             });
@@ -46,7 +47,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                 // 编辑按钮（弹框）
                                 // html.push('<a href="javascript:;" class="btn btn-xs btn-success btn-editone" data-toggle="tooltip" title="编辑" data-url="' + $.fn.bootstrapTable.defaults.extend.edit_url + '" data-id="' + row.id + '"><i class="fa fa-pencil"></i> 编辑</a> ');
                                 // 成员按钮（弹框）
-                                html.push('<a href="javascript:;" class="btn btn-xs btn-primary btn-dialog" data-toggle="tooltip" title="成员" data-url="' + $.fn.bootstrapTable.defaults.extend.member_url + '?group_id='+row.id+'" data-id="' + row.id + '"><i class="fa fa-users"></i> 成员</a>');
+                                html.push('<a href="javascript:;" class="btn btn-xs btn-primary btn-dialog" data-toggle="tooltip" title="成员" data-url="' + $.fn.bootstrapTable.defaults.extend.member_url + '?group_id='+row.id+'" data-id="' + row.id + '"><i class="fa fa-users"></i> 成员</a> ');
+                                // 虚拟成员按钮（弹框）
+                                html.push('<a href="javascript:;" class="btn btn-xs btn-warning btn-dialog" data-toggle="tooltip" title="虚拟成员" data-url="' + $.fn.bootstrapTable.defaults.extend.faker_url + '?group_id='+row.id+'" data-id="' + row.id + '"><i class="fa fa-user-secret"></i> 虚拟成员</a>');
                                 return html.join('');
                             }
                         }
