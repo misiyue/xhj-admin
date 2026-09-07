@@ -55,9 +55,4 @@ return [
     'Status updated' => '状态更新成功',
     'Confirm change status' => '确认切换用户状态？',
     'Leave password blank if dont want to change' => '不修改密码请留空',
-    'Username already exists' => '用户名已存在',
-    'Username must be 3 to 100 characters' => '用户名长度须为3-100位',
-    'Username can not be empty' => '用户名不能为空',
-    'Nickname can not be empty' => '昵称不能为空',
-    'Added successfully' => '添加成功',
 ];

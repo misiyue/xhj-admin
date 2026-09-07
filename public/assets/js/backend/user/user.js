@@ -5,7 +5,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             Table.api.init({
                 extend: {
                     index_url: 'user/user/index',
-                    add_url: 'user/user/add',
                     detail_url: 'user/user/detail',
                     table: 'users',
                 }

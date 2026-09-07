@@ -1,0 +1,92 @@
+<form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
+    {:token()}
+    <input type="hidden" name="row[group_id]" value="{$group_id|htmlentities}">
+
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('群组')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <p class="form-control-static">
+                <strong>ID: {$group_id|htmlentities}</strong>
+                {if isset($group) && !empty($group)}
+                （{$group.name|default='未命名群'|htmlentities}）
+                {/if}
+            </p>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="c-faker_id" class="control-label col-xs-12 col-sm-2">{:__('Faker_id')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-faker_id" class="form-control" name="row[faker_id]" type="number" min="1" step="1" value="" placeholder="输入假人ID后自动搜索" data-rule="required;integer(+)" autocomplete="off">
+            <span class="help-block">输入假人表主键 ID，下方将展示对应名片</span>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('名片预览')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <div id="faker-card" class="faker-card">
+                <div class="faker-card-empty text-muted">请输入假人ID进行搜索</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-group layer-footer">
+        <label class="control-label col-xs-12 col-sm-2"></label>
+        <div class="col-xs-12 col-sm-8">
+            <button type="submit" class="btn btn-primary btn-embossed disabled" id="btn-submit-add">{:__('确定添加')}</button>
+            <button type="reset" class="btn btn-default btn-embossed">{:__('Reset')}</button>
+        </div>
+    </div>
+</form>
+
+<style>
+    .faker-card {
+        border: 1px solid #e5e5e5;
+        border-radius: 4px;
+        background: #fafafa;
+        min-height: 96px;
+        padding: 14px 16px;
+    }
+    .faker-card-empty {
+        line-height: 68px;
+        text-align: center;
+    }
+    .faker-card-body {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+    .faker-card-avatar {
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        object-fit: cover;
+        background: #eee;
+        flex-shrink: 0;
+    }
+    .faker-card-meta {
+        flex: 1;
+        min-width: 0;
+    }
+    .faker-card-meta .name {
+        font-size: 16px;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 4px;
+    }
+    .faker-card-meta .sub {
+        color: #888;
+        font-size: 13px;
+        line-height: 1.6;
+    }
+    .faker-card-status {
+        margin-top: 10px;
+        padding-top: 10px;
+        border-top: 1px dashed #ddd;
+        font-size: 13px;
+    }
+    .faker-card-status.ok { color: #3c763d; }
+    .faker-card-status.warn { color: #a94442; }
+    .faker-card-status.info { color: #8a6d3b; }
+</style>
