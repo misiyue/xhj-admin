@@ -63,10 +63,68 @@ class User extends Backend
      */
     public function add()
     {
-        if ($this->request->isPost()) {
-            $this->token();
+        if (false === $this->request->isPost()) {
+            return $this->view->fetch();
         }
-        return parent::add();
+        $this->token();
+        $params = $this->request->post('row/a');
+        if (empty($params)) {
+            $this->error(__('Parameter %s can not be empty', ''));
+        }
+
+        $username = trim((string)($params['username'] ?? ''));
+        $password = (string)($params['password'] ?? '');
+        $nickname = trim((string)($params['nickname'] ?? ''));
+
+        if ($username === '') {
+            $this->error(__('Username can not be empty'));
+        }
+        if (!preg_match('/^[\w.@+-]{3,100}$/', $username)) {
+            $this->error(__('Username must be 3 to 100 characters'));
+        }
+        if ($nickname === '') {
+            $this->error(__('Nickname can not be empty'));
+        }
+        if ($password === '') {
+            $this->error(__('Password required'));
+        }
+        if (!Validate::is($password, '\S{6,30}')) {
+            $this->error(__('Password must be 6 to 30 characters'));
+        }
+        if ($this->model->where('username', $username)->find()) {
+            $this->error(__('Username already exists'));
+        }
+
+        $salt = Random::alnum(4);
+        $encrypted = md5($salt . $password . $salt);
+        $now = date('Y-m-d H:i:s');
+
+        Db::startTrans();
+        try {
+            $user = $this->model->create([
+                'user_id'        => 0,
+                'username'       => $username,
+                'nickname'       => $nickname,
+                'password'       => $encrypted,
+                'salt'           => $salt,
+                'uuid'           => 0,
+                'status'         => 1,
+                'is_robot'       => 2,
+                'is_trans'       => 0,
+                'money'          => 0,
+                'invite_user_id' => 0,
+                'invite_code'    => '',
+                'created_at'     => $now,
+                'updated_at'     => $now,
+            ], true);
+            // 与现有数据一致：user_id 对齐主键 id
+            Db::name('users')->where('id', $user->id)->update(['user_id' => (int)$user->id]);
+            Db::commit();
+        } catch (\Throwable $e) {
+            Db::rollback();
+            $this->error($e->getMessage());
+        }
+        $this->success(__('Added successfully'));
     }
 
     /**
