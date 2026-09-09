@@ -41,7 +41,13 @@ class Addon extends Backend
             $v['config'] = $config ? 1 : 0;
             $v['url'] = str_replace($this->request->server('SCRIPT_NAME'), '', $v['url']);
         }
-        $this->assignconfig(['addons' => $addons, 'api_url' => config('fastadmin.api_url'), 'faversion' => config('fastadmin.version'), 'domain' => request()->host(true)]);
+        $this->assignconfig([
+            'addons'         => $addons,
+            'api_url'        => config('fastadmin.api_url'),
+            'faversion'      => config('fastadmin.version'),
+            'domain'         => request()->host(true),
+            'unknownsources' => (bool)(config('app_debug') && config('fastadmin.unknownsources')),
+        ]);
         return $this->view->fetch();
     }
 
@@ -236,21 +242,127 @@ class Addon extends Backend
             $token = $this->request->post("token");
             $faversion = $this->request->post("faversion");
             $force = $this->request->post("force");
-            if (!$uid || !$token) {
+            $allowUnknown = config('app_debug') && config('fastadmin.unknownsources');
+
+            // 离线/未知来源模式可不登录 FastAdmin 账号
+            if (!$allowUnknown && (!$uid || !$token)) {
                 throw new Exception(__('Please login and try to install'));
             }
             $extend = [
-                'uid'       => $uid,
-                'token'     => $token,
+                'uid'       => $uid ?: 0,
+                'token'     => $token ?: '',
                 'faversion' => $faversion
             ];
-            $info = Service::local($file, $extend, $force);
+
+            if ($allowUnknown) {
+                // 跳过远程校验，避免访问 api.fastadmin.net 失败导致「网络错误」
+                $info = $this->localOffline($file, $extend, $force);
+            } else {
+                $info = Service::local($file, $extend, $force);
+            }
         } catch (AddonException $e) {
             $this->result($e->getData(), $e->getCode(), __($e->getMessage()));
         } catch (Exception $e) {
             $this->error(__($e->getMessage()));
+        } catch (\Throwable $e) {
+            $this->error($e->getMessage());
         }
         $this->success(__('Offline installed tips'), '', ['addon' => $info]);
+    }
+
+    /**
+     * 本地离线安装（不请求 FastAdmin 远程校验）
+     *
+     * @param \think\File $file
+     * @param array       $extend
+     * @param bool|string $force
+     * @return array
+     * @throws Exception
+     * @throws AddonException
+     */
+    protected function localOffline($file, $extend = [], $force = false)
+    {
+        $addonsTempDir = RUNTIME_PATH . 'addons' . DS;
+        if (!is_dir($addonsTempDir)) {
+            @mkdir($addonsTempDir, 0755, true);
+        }
+        if (!$file || !$file instanceof \think\File) {
+            throw new Exception(__('No file upload or server upload limit exceeded'));
+        }
+
+        $uploadFile = $file->rule('uniqid')->validate(['size' => 102400000, 'ext' => 'zip,fastaddon'])->move($addonsTempDir);
+        if (!$uploadFile) {
+            throw new Exception(__($file->getError()));
+        }
+        $tmpFile = $addonsTempDir . $uploadFile->getSaveName();
+        $force = (bool)$force;
+
+        $zip = new \PhpZip\ZipFile();
+        try {
+            try {
+                $zip->openFile($tmpFile);
+            } catch (\PhpZip\Exception\ZipException $e) {
+                @unlink($tmpFile);
+                throw new Exception(__('Unable to open the zip file'));
+            }
+
+            try {
+                $infoIni = $zip->getEntryContents('info.ini');
+                $config = parse_ini_string($infoIni);
+            } catch (\PhpZip\Exception\ZipException $e) {
+                @unlink($tmpFile);
+                throw new Exception(__('Unable to extract the file'));
+            }
+
+            $name = $config['name'] ?? '';
+            if (!$name) {
+                throw new Exception(__('Addon info file data incorrect'));
+            }
+            if (!preg_match("/^[a-zA-Z0-9]+$/", $name)) {
+                throw new Exception(__('Addon name incorrect'));
+            }
+
+            $newAddonDir = ADDON_PATH . $name . DS;
+            if (!$force && is_dir($newAddonDir)) {
+                throw new AddonException(__('Addon already exists'), -1, ['name' => $name, 'title' => $config['title'] ?? $name]);
+            }
+
+            $oldversion = '';
+            if (is_dir($newAddonDir) && is_file($newAddonDir . 'info.ini')) {
+                $oldConfig = parse_ini_file($newAddonDir . 'info.ini');
+                $oldversion = $oldConfig['version'] ?? '';
+            }
+
+            $extend['oldversion'] = $oldversion;
+            $extend['version'] = $config['version'] ?? '';
+            $extend['faversion'] = config('fastadmin.version');
+
+            // 关闭 zip，避免占用临时文件；后续 install/upgrade 会自行处理
+            $zip->close();
+
+            if (!$oldversion) {
+                $info = Service::install($name, $force, $extend, $tmpFile);
+            } else {
+                $info = Service::upgrade($name, $extend, $tmpFile);
+            }
+        } catch (AddonException $e) {
+            throw $e;
+        } catch (Exception $e) {
+            throw new Exception(__($e->getMessage()));
+        } finally {
+            try {
+                $zip->close();
+            } catch (\Throwable $e) {
+            }
+            unset($uploadFile);
+            is_file($tmpFile) && @unlink($tmpFile);
+        }
+
+        $info['config'] = get_addon_config($name) ? 1 : 0;
+        $info['bootstrap'] = is_file(Service::getBootstrapFile($name));
+        $info['testdata'] = is_file(Service::getTestdataFile($name));
+        Cache::rm('__menu__');
+        return $info;
     }
 
     /**

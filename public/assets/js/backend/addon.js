@@ -265,8 +265,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'template', 'cookie']
                     }
                 });
 
-                // 检测是否登录
+                // 检测是否登录（允许未知来源时跳过 FastAdmin 账号登录）
                 $(document).on("mousedown", "#faupload-addon", function (e) {
+                    if (Config.unknownsources) {
+                        return true;
+                    }
                     var userinfo = Controller.api.userinfo.get();
                     var uid = userinfo ? userinfo.id : 0;
                     var uploadBtn = Upload.list['faupload-addon'];
