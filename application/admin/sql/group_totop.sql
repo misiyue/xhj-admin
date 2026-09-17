@@ -1,6 +1,7 @@
 -- 群置顶推广位
 CREATE TABLE IF NOT EXISTS `group_totop` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) DEFAULT NULL COMMENT '名称',
   `cover` varchar(255) DEFAULT NULL COMMENT '封面',
   `intro` varchar(255) DEFAULT NULL COMMENT '介绍',
   `btn` varchar(255) DEFAULT NULL COMMENT '按钮文案',

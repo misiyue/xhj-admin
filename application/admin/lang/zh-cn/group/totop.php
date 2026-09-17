@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'Title'              => '名称',
     'Cover'              => '封面',
     'Intro'              => '介绍',
     'Btn'                => '按钮文案',

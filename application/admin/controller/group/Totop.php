@@ -18,7 +18,7 @@ class Totop extends Backend
      */
     protected $model = null;
 
-    protected $searchFields = 'id,intro,btn,url,group_ids';
+    protected $searchFields = 'id,title,btn,url,group_ids';
 
     protected $modelValidate = true;
 

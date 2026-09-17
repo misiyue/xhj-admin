@@ -7,6 +7,7 @@ use think\Validate;
 class GroupTotop extends Validate
 {
     protected $rule = [
+        'title'     => 'max:255',
         'cover'     => 'max:255',
         'intro'     => 'max:255',
         'btn'       => 'max:255',
@@ -19,13 +20,14 @@ class GroupTotop extends Validate
     ];
 
     protected $scene = [
-        'add'  => ['cover', 'intro', 'btn', 'url', 'group_ids', 'sort'],
-        'edit' => ['cover', 'intro', 'btn', 'url', 'group_ids', 'sort'],
+        'add'  => ['title', 'cover', 'intro', 'btn', 'url', 'group_ids', 'sort'],
+        'edit' => ['title', 'cover', 'intro', 'btn', 'url', 'group_ids', 'sort'],
     ];
 
     public function __construct(array $rules = [], $message = [], $field = [])
     {
         $this->field = [
+            'title'     => __('Title'),
             'cover'     => __('Cover'),
             'intro'     => __('Intro'),
             'btn'       => __('Btn'),

@@ -31,7 +31,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             formatter: Table.api.formatter.image,
                             operate: false
                         },
-                        {field: 'intro', title: __('Intro'), operate: 'LIKE'},
+                        {field: 'title', title: __('Title'), operate: 'LIKE'},
                         {field: 'btn', title: __('Btn'), operate: 'LIKE'},
                         {
                             field: 'url',
