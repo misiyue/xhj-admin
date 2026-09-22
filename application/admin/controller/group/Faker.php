@@ -125,33 +125,57 @@ class Faker extends Backend
             $this->token();
             $params = $this->request->post('row/a', []);
             $groupId = (int)($params['group_id'] ?? $groupId);
-            $fakerId = (int)($params['faker_id'] ?? 0);
+            $fakerIdsRaw = (string)($params['faker_ids'] ?? '');
+            if ($fakerIdsRaw === '' && isset($params['faker_id'])) {
+                $fakerIdsRaw = (string)$params['faker_id'];
+            }
 
             if ($groupId <= 0) {
                 $this->error(__('群组不存在'));
             }
-            if ($fakerId <= 0) {
+
+            $fakerIds = array_values(array_unique(array_filter(array_map('intval', preg_split('/\s*,\s*/', str_replace('，', ',', $fakerIdsRaw), -1, PREG_SPLIT_NO_EMPTY)))));
+            if (empty($fakerIds)) {
                 $this->error(__('请输入有效的假人ID'));
             }
 
-            $faker = Db::name('user_faker')->where('id', $fakerId)->find();
-            if (!$faker) {
-                $this->error(__('未找到该假人'));
+            $existingFakerIds = Db::name('group_faker')
+                ->where('group_id', $groupId)
+                ->whereIn('faker_id', $fakerIds)
+                ->column('faker_id');
+            $existingMap = array_flip($existingFakerIds);
+
+            $insertRows = [];
+            $skipped = 0;
+            foreach ($fakerIds as $fakerId) {
+                if ($fakerId <= 0) {
+                    continue;
+                }
+                if (isset($existingMap[$fakerId])) {
+                    $skipped++;
+                    continue;
+                }
+                $faker = Db::name('user_faker')->where('id', $fakerId)->find();
+                if (!$faker) {
+                    $this->error(__('未找到该假人') . ' (ID:' . $fakerId . ')');
+                }
+                $insertRows[] = [
+                    'group_id' => $groupId,
+                    'faker_id' => $fakerId,
+                ];
+                $existingMap[$fakerId] = true;
             }
 
-            $exists = Db::name('group_faker')
-                ->where('group_id', $groupId)
-                ->where('faker_id', $fakerId)
-                ->find();
-            if ($exists) {
+            if (empty($insertRows)) {
                 $this->error(__('该假人已是当前群虚拟成员'));
             }
 
-            Db::name('group_faker')->insert([
-                'group_id' => $groupId,
-                'faker_id' => $fakerId,
-            ]);
-            $this->success(__('添加成功'));
+            Db::name('group_faker')->insertAll($insertRows);
+            $msg = __('添加成功');
+            if ($skipped > 0) {
+                $msg .= '（已跳过 ' . $skipped . ' 个已在群中的假人）';
+            }
+            $this->success($msg);
         }
 
         $this->assignconfig('group_id', $groupId);

@@ -15,18 +15,18 @@
     </div>
 
     <div class="form-group">
-        <label for="c-faker_id" class="control-label col-xs-12 col-sm-2">{:__('Faker_id')}:</label>
+        <label for="c-faker_ids" class="control-label col-xs-12 col-sm-2">{:__('Faker_id')}:</label>
         <div class="col-xs-12 col-sm-8">
-            <input id="c-faker_id" class="form-control" name="row[faker_id]" type="number" min="1" step="1" value="" placeholder="输入假人ID后自动搜索" data-rule="required;integer(+)" autocomplete="off">
-            <span class="help-block">输入假人表主键 ID，下方将展示对应名片</span>
+            <input id="c-faker_ids" class="form-control" name="row[faker_ids]" type="text" value="" placeholder="多个假人ID请用英文逗号分隔，如：1,2,3" data-rule="required" autocomplete="off">
+            <span class="help-block">输入假人表主键 ID，多个请用英文「,」分隔，下方将展示对应名片</span>
         </div>
     </div>
 
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">{:__('名片预览')}:</label>
         <div class="col-xs-12 col-sm-8">
-            <div id="faker-card" class="faker-card">
-                <div class="faker-card-empty text-muted">请输入假人ID进行搜索</div>
+            <div id="faker-cards" class="faker-cards">
+                <div class="faker-cards-empty text-muted">请输入假人ID进行搜索</div>
             </div>
         </div>
     </div>
@@ -41,25 +41,43 @@
 </form>
 
 <style>
-    .faker-card {
+    .faker-cards {
         border: 1px solid #e5e5e5;
         border-radius: 4px;
         background: #fafafa;
         min-height: 96px;
         padding: 14px 16px;
+        display: flex;
+        flex-wrap: wrap;
+        align-content: flex-start;
+        gap: 12px;
     }
-    .faker-card-empty {
+    .faker-cards-empty {
+        width: 100%;
         line-height: 68px;
         text-align: center;
+    }
+    .faker-card-item {
+        flex: 0 1 280px;
+        max-width: 100%;
+        box-sizing: border-box;
+        border: 1px solid #e0e0e0;
+        border-radius: 4px;
+        background: #fff;
+        padding: 12px 14px;
+    }
+    .faker-card-item.is-invalid {
+        border-color: #ebccd1;
+        background: #fdf7f7;
     }
     .faker-card-body {
         display: flex;
         align-items: center;
-        gap: 14px;
+        gap: 12px;
     }
     .faker-card-avatar {
-        width: 64px;
-        height: 64px;
+        width: 52px;
+        height: 52px;
         border-radius: 50%;
         object-fit: cover;
         background: #eee;
@@ -70,23 +88,27 @@
         min-width: 0;
     }
     .faker-card-meta .name {
-        font-size: 16px;
+        font-size: 15px;
         font-weight: 600;
         color: #333;
-        margin-bottom: 4px;
+        margin-bottom: 2px;
+        word-break: break-all;
     }
     .faker-card-meta .sub {
         color: #888;
-        font-size: 13px;
-        line-height: 1.6;
+        font-size: 12px;
+        line-height: 1.5;
+        word-break: break-all;
     }
     .faker-card-status {
-        margin-top: 10px;
-        padding-top: 10px;
+        margin-top: 8px;
+        padding-top: 8px;
         border-top: 1px dashed #ddd;
-        font-size: 13px;
+        font-size: 12px;
+        line-height: 1.4;
     }
     .faker-card-status.ok { color: #3c763d; }
     .faker-card-status.warn { color: #a94442; }
     .faker-card-status.info { color: #8a6d3b; }
+    .faker-card-status.err { color: #a94442; }
 </style>

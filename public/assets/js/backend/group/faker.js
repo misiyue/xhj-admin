@@ -57,17 +57,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
         },
         add: function () {
             var groupId = (Config && Config.group_id) ? Config.group_id : '';
-            var $input = $('#c-faker_id');
-            var $card = $('#faker-card');
-            var $submit = $('#btn-submit-add');
+            var $input = $('#c-faker_ids');
+            var $cards = $('#faker-cards');
             var timer = null;
             var lastRequestId = 0;
             var canSubmit = false;
-
-            var renderEmpty = function (msg) {
-                canSubmit = false;
-                $card.html('<div class="faker-card-empty text-muted">' + (msg || '请输入假人ID进行搜索') + '</div>');
-            };
 
             var escapeHtml = function (str) {
                 return String(str == null ? '' : str)
@@ -78,19 +72,71 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     .replace(/'/g, '&#39;');
             };
 
-            var renderCard = function (data) {
+            var renderEmpty = function (msg) {
+                canSubmit = false;
+                $cards.html('<div class="faker-cards-empty text-muted">' + (msg || '请输入假人ID进行搜索') + '</div>');
+            };
+
+            var parseFakerIds = function (raw) {
+                var seen = {};
+                var items = [];
+                String(raw || '').split(',').forEach(function (part) {
+                    var token = $.trim(part);
+                    if (token === '') {
+                        return;
+                    }
+                    if (!/^\d+$/.test(token) || parseInt(token, 10) <= 0) {
+                        items.push({type: 'invalid', token: token});
+                        return;
+                    }
+                    var id = parseInt(token, 10);
+                    if (seen[id]) {
+                        return;
+                    }
+                    seen[id] = true;
+                    items.push({type: 'id', id: id});
+                });
+                return items;
+            };
+
+            var buildCardHtml = function (options) {
+                var cls = 'faker-card-item' + (options.invalid ? ' is-invalid' : '');
+                var statusClass = options.statusClass || 'info';
+                var bodyHtml = options.bodyHtml || '';
+                return ''
+                    + '<div class="' + cls + '" data-faker-id="' + escapeHtml(options.fakerId || '') + '">'
+                    + bodyHtml
+                    + '<div class="faker-card-status ' + statusClass + '">' + options.statusText + '</div>'
+                    + '</div>';
+            };
+
+            var renderInvalidCard = function (token) {
+                return buildCardHtml({
+                    invalid: true,
+                    fakerId: '',
+                    statusClass: 'err',
+                    statusText: 'ID 格式无效：' + escapeHtml(token),
+                    bodyHtml: ''
+                        + '<div class="faker-card-body">'
+                        + '  <div class="faker-card-meta">'
+                        + '    <div class="name">无效 ID</div>'
+                        + '    <div class="sub">' + escapeHtml(token) + '</div>'
+                        + '  </div>'
+                        + '</div>'
+                });
+            };
+
+            var renderFoundCard = function (data) {
                 var avatar = data.avatar || '/assets/img/avatar.png';
                 var statusClass = 'ok';
                 var statusText = '可以添加为当前群虚拟成员';
-                canSubmit = true;
 
                 if (data.exists_in_group) {
                     statusClass = 'warn';
                     statusText = '该假人已是当前群虚拟成员，无法重复添加';
-                    canSubmit = false;
                 }
 
-                var html = ''
+                var bodyHtml = ''
                     + '<div class="faker-card-body">'
                     + '  <img class="faker-card-avatar" src="' + escapeHtml(avatar) + '" alt="avatar">'
                     + '  <div class="faker-card-meta">'
@@ -99,59 +145,136 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     + '    <div class="sub">用户名：' + escapeHtml(data.username || '-') + '</div>'
                     + (data.user_id ? ('    <div class="sub">用户ID：' + escapeHtml(data.user_id) + '</div>') : '')
                     + '  </div>'
-                    + '</div>'
-                    + '<div class="faker-card-status ' + statusClass + '">' + statusText + '</div>';
+                    + '</div>';
 
-                $card.html(html);
+                return buildCardHtml({
+                    fakerId: data.id,
+                    statusClass: statusClass,
+                    statusText: statusText,
+                    bodyHtml: bodyHtml
+                });
             };
 
-            var searchFaker = function () {
-                var fakerId = $.trim($input.val());
-                if (!fakerId || !/^\d+$/.test(fakerId) || parseInt(fakerId, 10) <= 0) {
+            var renderNotFoundCard = function (id) {
+                return buildCardHtml({
+                    invalid: true,
+                    fakerId: id,
+                    statusClass: 'err',
+                    statusText: '未找到该假人',
+                    bodyHtml: ''
+                        + '<div class="faker-card-body">'
+                        + '  <div class="faker-card-meta">'
+                        + '    <div class="name">假人#' + escapeHtml(id) + '</div>'
+                        + '    <div class="sub">数据库中不存在</div>'
+                        + '  </div>'
+                        + '</div>'
+                });
+            };
+
+            var updateSubmitState = function (state) {
+                canSubmit = !!(state && state.canSubmit);
+            };
+
+            var searchFakers = function () {
+                var items = parseFakerIds($.trim($input.val()));
+                if (!items.length) {
                     renderEmpty('请输入有效的假人ID');
                     return;
                 }
 
                 var requestId = ++lastRequestId;
-                $card.html('<div class="faker-card-empty text-muted">搜索中...</div>');
                 canSubmit = false;
+                $cards.html('<div class="faker-cards-empty text-muted">搜索中...</div>');
 
-                $.ajax({
-                    url: 'group/faker/preview',
-                    type: 'GET',
-                    dataType: 'json',
-                    data: {
-                        faker_id: fakerId,
-                        group_id: groupId
-                    },
-                    success: function (ret) {
-                        if (requestId !== lastRequestId) {
-                            return;
-                        }
-                        if (ret && ret.code === 1 && ret.data) {
-                            renderCard(ret.data);
-                        } else {
-                            renderEmpty((ret && ret.msg) ? ret.msg : '未找到该假人');
-                        }
-                    },
-                    error: function () {
-                        if (requestId !== lastRequestId) {
-                            return;
-                        }
-                        renderEmpty('搜索失败，请稍后重试');
+                var htmlParts = [];
+                var fetchItems = [];
+
+                items.forEach(function (item) {
+                    if (item.type === 'invalid') {
+                        htmlParts.push({sort: htmlParts.length, html: renderInvalidCard(item.token)});
+                    } else {
+                        htmlParts.push({sort: htmlParts.length, pending: true, id: item.id});
+                        fetchItems.push(item.id);
                     }
+                });
+
+                if (!fetchItems.length) {
+                    $cards.html(htmlParts.map(function (p) { return p.html; }).join(''));
+                    updateSubmitState({canSubmit: false});
+                    return;
+                }
+
+                var completed = 0;
+                var hasInvalid = htmlParts.some(function (p) { return p.html && !p.pending; });
+                var addableCount = 0;
+
+                fetchItems.forEach(function (fakerId) {
+                    $.ajax({
+                        url: 'group/faker/preview',
+                        type: 'GET',
+                        dataType: 'json',
+                        data: {
+                            faker_id: fakerId,
+                            group_id: groupId
+                        },
+                        success: function (ret) {
+                            if (requestId !== lastRequestId) {
+                                return;
+                            }
+                            htmlParts.forEach(function (part) {
+                                if (part.pending && part.id === fakerId) {
+                                    if (ret && ret.code === 1 && ret.data) {
+                                        part.html = renderFoundCard(ret.data);
+                                        if (!ret.data.exists_in_group) {
+                                            addableCount++;
+                                        }
+                                    } else {
+                                        part.html = renderNotFoundCard(fakerId);
+                                        hasInvalid = true;
+                                    }
+                                    part.pending = false;
+                                }
+                            });
+                        },
+                        error: function () {
+                            if (requestId !== lastRequestId) {
+                                return;
+                            }
+                            htmlParts.forEach(function (part) {
+                                if (part.pending && part.id === fakerId) {
+                                    part.html = renderNotFoundCard(fakerId);
+                                    part.pending = false;
+                                    hasInvalid = true;
+                                }
+                            });
+                        },
+                        complete: function () {
+                            if (requestId !== lastRequestId) {
+                                return;
+                            }
+                            completed++;
+                            if (completed < fetchItems.length) {
+                                return;
+                            }
+                            htmlParts.sort(function (a, b) { return a.sort - b.sort; });
+                            $cards.html(htmlParts.map(function (p) { return p.html; }).join(''));
+                            updateSubmitState({
+                                canSubmit: !hasInvalid && addableCount > 0
+                            });
+                        }
+                    });
                 });
             };
 
             $input.on('input', function () {
                 clearTimeout(timer);
                 canSubmit = false;
-                timer = setTimeout(searchFaker, 350);
+                timer = setTimeout(searchFakers, 350);
             });
 
             $input.on('change blur', function () {
                 clearTimeout(timer);
-                searchFaker();
+                searchFakers();
             });
 
             $('form[role=form]').on('reset', function () {
@@ -162,7 +285,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
 
             Form.api.bindevent($('form[role=form]'), null, null, function () {
                 if (!canSubmit) {
-                    Toastr.error('请先输入有效且未加入该群的假人ID');
+                    Toastr.error('请填写有效假人ID，且至少有一个可添加（已在群中的假人无法重复添加）');
                     return false;
                 }
             });
