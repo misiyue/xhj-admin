@@ -193,12 +193,59 @@ class Report extends Backend
             }
 
             $row['defe_type_text'] = $defeTypeList[$defeType] ?? '-';
+            $row['reporter_display'] = $this->formatReporterDisplay($reporterId, $row['reporter_nickname']);
+            $row['defe_party_display'] = $this->formatDefePartyDisplay(
+                $defeType,
+                $defeId,
+                $row['defe_name'],
+                $row['defe_type_text']
+            );
             $status = (int)($row['status'] ?? 0);
             $result = (int)($row['result'] ?? 0);
             $row['status_text'] = $statusList[$status] ?? (string)$status;
             $row['result_text'] = $resultList[$result] ?? (string)$result;
         }
         unset($row);
+    }
+
+    /**
+     * @param int    $userId
+     * @param string $nickname
+     * @return string
+     */
+    protected function formatReporterDisplay($userId, $nickname)
+    {
+        $userId = (int)$userId;
+        if ($userId <= 0) {
+            return '-';
+        }
+        $nickname = trim((string)$nickname);
+        if ($nickname !== '' && $nickname !== '-') {
+            return $nickname . '（ID:' . $userId . '）';
+        }
+        return 'ID:' . $userId;
+    }
+
+    /**
+     * @param int    $defeType
+     * @param int    $defeId
+     * @param string $defeName
+     * @param string $defeTypeText
+     * @return string
+     */
+    protected function formatDefePartyDisplay($defeType, $defeId, $defeName, $defeTypeText)
+    {
+        $defeId = (int)$defeId;
+        if ($defeId <= 0) {
+            return '-';
+        }
+        $defeType = (int)$defeType;
+        $typeLabel = $defeTypeText !== '-' ? $defeTypeText : ($defeType === 2 ? __('Defe group prefix') : __('Defe user prefix'));
+        $defeName = trim((string)$defeName);
+        if ($defeName !== '' && $defeName !== '-') {
+            return $typeLabel . ' ' . $defeName . '（ID:' . $defeId . '）';
+        }
+        return $typeLabel . $defeId;
     }
 
     /**

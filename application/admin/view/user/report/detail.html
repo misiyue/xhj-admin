@@ -9,39 +9,15 @@
         </div>
     </div>
     <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-3">{:__('Reporter user id')}:</label>
-        <div class="col-xs-12 col-sm-8">
-            <p class="form-control-static">{$row.user_id|default='-'|htmlentities}</p>
-        </div>
-    </div>
-    <div class="form-group">
         <label class="control-label col-xs-12 col-sm-3">{:__('Reporter nickname')}:</label>
         <div class="col-xs-12 col-sm-8">
-            <p class="form-control-static">{$row.reporter_nickname|default='-'|htmlentities}</p>
-        </div>
-    </div>
-    <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-3">{:__('Defe id')}:</label>
-        <div class="col-xs-12 col-sm-8">
-            <p class="form-control-static">{$row.defe_id|default='-'|htmlentities}</p>
-        </div>
-    </div>
-    <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-3">{:__('Defe type')}:</label>
-        <div class="col-xs-12 col-sm-8">
-            <p class="form-control-static">{$row.defe_type_text|default='-'|htmlentities}（{$row.defe_type|default='-'|htmlentities}）</p>
-        </div>
-    </div>
-    <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-3">{:__('Defe name')}:</label>
-        <div class="col-xs-12 col-sm-8">
-            <p class="form-control-static">{$row.defe_name|default='-'|htmlentities}</p>
+            <p class="form-control-static">{$row.reporter_display|default='-'|htmlentities}</p>
         </div>
     </div>
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-3">{:__('Defe party')}:</label>
         <div class="col-xs-12 col-sm-8">
-            <p class="form-control-static">{$row.defe_party_text|default='-'|htmlentities}</p>
+            <p class="form-control-static">{$row.defe_party_display|default='-'|htmlentities}</p>
         </div>
     </div>
     <div class="form-group">
