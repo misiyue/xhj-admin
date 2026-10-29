@@ -9,11 +9,67 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     edit_url: 'group/group/edit',
                     member_url: 'group/member/index',
                     faker_url: 'group/faker/index',
+                    forcestatus_url: 'group/group/forcestatus',
                     table: 'group',
                 }
             });
 
             var table = $("#table");
+
+            var escapeHtml = function (str) {
+                return String(str == null ? '' : str)
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&#39;');
+            };
+
+            var openForceStatusDialog = function (row) {
+                var current = parseInt(row.force_status, 10) === 1 ? 1 : 0;
+                var groupName = escapeHtml(row.name || '-');
+                var content = ''
+                    + '<div style="padding:20px 24px 8px;">'
+                    + '<p class="text-muted" style="margin-bottom:12px;">群 ID：' + escapeHtml(row.id) + '　名称：' + groupName + '</p>'
+                    + '<label class="radio-inline" style="margin-right:16px;">'
+                    + '<input type="radio" name="force_status_pick" value="0"' + (current === 0 ? ' checked' : '') + '> 正常'
+                    + '</label>'
+                    + '<label class="radio-inline">'
+                    + '<input type="radio" name="force_status_pick" value="1"' + (current === 1 ? ' checked' : '') + '> 群禁言'
+                    + '</label>'
+                    + '</div>';
+
+                Layer.open({
+                    type: 1,
+                    title: '修改强制状态',
+                    area: ['400px', 'auto'],
+                    content: content,
+                    btn: ['确定', '取消'],
+                    yes: function (index, layero) {
+                        var forceStatus = layero.find('input[name="force_status_pick"]:checked').val();
+                        Fast.api.ajax({
+                            url: $.fn.bootstrapTable.defaults.extend.forcestatus_url,
+                            type: 'POST',
+                            data: {
+                                ids: row.id,
+                                force_status: forceStatus
+                            }
+                        }, function () {
+                            table.bootstrapTable('refresh');
+                            Layer.close(index);
+                        });
+                        return false;
+                    }
+                });
+            };
+
+            var formatForceStatus = function (value, row) {
+                var v = parseInt(value, 10);
+                var label = v === 1 ? '群禁言' : '正常';
+                var cls = v === 1 ? 'label-danger' : 'label-success';
+                return '<a href="javascript:;" class="btn-force-status">'
+                    + '<span class="label ' + cls + '" style="cursor:pointer">' + label + '</span></a>';
+            };
 
             // 初始化表格
             table.bootstrapTable({
@@ -43,12 +99,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             operate: '=',
                             sortable: true,
                             searchList: {0: '正常', 1: '群禁言'},
-                            formatter: function (value) {
-                                var v = parseInt(value, 10);
-                                if (v === 1) {
-                                    return '<span class="label label-danger">群禁言</span>';
+                            formatter: formatForceStatus,
+                            events: {
+                                'click .btn-force-status': function (e, value, row) {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    openForceStatusDialog(row);
                                 }
-                                return '<span class="label label-success">正常</span>';
                             }
                         },
                         {field: 'created_at', title: '创建时间', formatter: Table.api.formatter.datetime, operate: 'RANGE', addclass: 'datetimerange', sortable: true},

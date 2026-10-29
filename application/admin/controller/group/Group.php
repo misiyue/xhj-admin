@@ -5,11 +5,14 @@ namespace app\admin\controller\group;
 use app\admin\model\Group as GroupModel;
 use app\common\controller\Backend;
 use app\common\library\Auth;
+use think\Db;
 
 class Group extends Backend
 {
     protected $relationSearch = true;
     protected $searchFields = 'id,name';
+
+    protected $noNeedRight = ['forcestatus'];
 
     /**
      * @var GroupModel
@@ -49,6 +52,33 @@ class Group extends Backend
         return $this->view->fetch();
     }
 
+
+    /**
+     * 修改强制状态（仅 Ajax POST）
+     */
+    public function forcestatus()
+    {
+        if (!$this->request->isPost()) {
+            $this->error(__('Invalid parameters'));
+        }
+        $ids = (int)$this->request->post('ids', 0);
+        if ($ids <= 0) {
+            $this->error(__('Invalid parameters'));
+        }
+        $row = $this->model->get($ids);
+        if (!$row) {
+            $this->error(__('No Results were found'));
+        }
+        $forceStatus = (int)$this->request->post('force_status', 0);
+        if (!in_array($forceStatus, [0, 1], true)) {
+            $this->error(__('Invalid parameters'));
+        }
+        Db::name('group')->where('id', $row['id'])->update([
+            'force_status' => $forceStatus,
+            'updated_at'   => date('Y-m-d H:i:s'),
+        ]);
+        $this->success(__('Operation completed'));
+    }
 
     /**
      * 编辑
