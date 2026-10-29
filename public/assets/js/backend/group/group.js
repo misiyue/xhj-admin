@@ -37,6 +37,20 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                 }
                             }, searchList: {1:'是',2:'否'}},
                         {field: 'is_dismiss', title: __('Status'), formatter: Table.api.formatter.status, searchList: {1:'解散',2:'正常'}},
+                        {
+                            field: 'force_status',
+                            title: '强制状态',
+                            operate: '=',
+                            sortable: true,
+                            searchList: {0: '正常', 1: '群禁言'},
+                            formatter: function (value) {
+                                var v = parseInt(value, 10);
+                                if (v === 1) {
+                                    return '<span class="label label-danger">群禁言</span>';
+                                }
+                                return '<span class="label label-success">正常</span>';
+                            }
+                        },
                         {field: 'created_at', title: '创建时间', formatter: Table.api.formatter.datetime, operate: 'RANGE', addclass: 'datetimerange', sortable: true},
                         {field: 'operate', title: __('Operate'), table: table,
                             // 使用FastAdmin标准事件配置

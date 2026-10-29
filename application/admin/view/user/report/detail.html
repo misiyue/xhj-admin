@@ -1,0 +1,78 @@
+<form id="detail-form" class="form-horizontal" role="form" method="POST" action="">
+    {:token()}
+    <input type="hidden" name="ids" value="{$row.id|htmlentities}">
+
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-3">{:__('Id')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <p class="form-control-static">{$row.id|htmlentities}</p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-3">{:__('Reporter nickname')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <p class="form-control-static">{$row.reporter_display|default='-'|htmlentities}</p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-3">{:__('Defe party')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <p class="form-control-static">{$row.defe_party_display|default='-'|htmlentities}</p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-3">{:__('Reason')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <p class="form-control-static">{$row.reason|default='-'|htmlentities}</p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-3">{:__('Report status')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <p class="form-control-static" id="status-text">{$row.status_text|default='-'|htmlentities}</p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-3">{:__('Process result')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <p class="form-control-static" id="result-text">{$row.result_text|default='-'|htmlentities}</p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-3">{:__('Createtime')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <p class="form-control-static">{$row.created_at|default='-'|htmlentities}</p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-3">{:__('Updatetime')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <p class="form-control-static">{$row.updated_at|default='-'|htmlentities}</p>
+        </div>
+    </div>
+
+    {if isset($row.status) && $row.status == 0}
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-3">{:__('Handle report')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <div class="report-handle-options">
+                <label class="radio-inline">
+                    <input type="radio" name="result" value="-1"> {:__('Ignore')}
+                </label>
+                {if isset($row.defe_type) && $row.defe_type == 1}
+                <label class="radio-inline">
+                    <input type="radio" name="result" value="1"> {:__('Account ban')}
+                </label>
+                {/if}
+                {if isset($row.defe_type) && $row.defe_type == 2}
+                <label class="radio-inline">
+                    <input type="radio" name="result" value="2"> {:__('Group mute')}
+                </label>
+                {/if}
+            </div>
+            <p class="help-block">{:__('Handle report help')}</p>
+            <button type="button" class="btn btn-danger btn-report-process"><i class="fa fa-gavel"></i> {:__('Process')}</button>
+        </div>
+    </div>
+    {/if}
+</form>
