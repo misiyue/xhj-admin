@@ -1,5 +1,23 @@
 require.config({
-    urlArgs: "v=" + requirejs.s.contexts._.config.config.site.version,
+    urlArgs: function (id, url) {
+        var site = requirejs.s.contexts._.config.config && requirejs.s.contexts._.config.config.site;
+        var version = site && site.version ? site.version : '';
+        if (!version) {
+            return '';
+        }
+        var ref = (id || '') + ' ' + (url || '');
+        // 第三方 libs、插件自带静态资源不加 v，便于浏览器长期缓存
+        if (/(\.\.\/libs\/|\/assets\/libs\/|\/libs\/)/.test(ref)) {
+            return '';
+        }
+        if (/\.\.\/addons\/[^/?]+\/(js|css)\//.test(ref)) {
+            return '';
+        }
+        if (/[\\/](dropzone|echarts|echarts-theme)(\.min)?\.js/i.test(ref)) {
+            return '';
+        }
+        return 'v=' + version;
+    },
     packages: [{
         name: 'moment',
         location: '../libs/moment',
